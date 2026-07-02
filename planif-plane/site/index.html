@@ -19,20 +19,20 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
-  .app{display:flex;flex-direction:column;height:100%}
+  .app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
-  .topbar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--card);
+  .topbar{display:flex;align-items:center;gap:12px;padding:8px 16px;background:var(--card);
     border-bottom:1px solid var(--edge);flex-wrap:wrap}
   .logo{display:flex;align-items:center;gap:9px}
-  .logo .mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#f2a23d,#e07b1f);
-    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px}
-  .topbar h1{font-size:17px;font-weight:700;margin:0;letter-spacing:.2px}
+  .logo .mark{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#f2a23d,#e07b1f);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px}
+  .topbar h1{font-size:16px;font-weight:700;margin:0;letter-spacing:.2px}
   .topbar .tag{font-size:11px;color:var(--signal-ink);border:1px solid #f0d9b8;background:#fdf6ec;
-    border-radius:100px;padding:3px 10px;letter-spacing:.4px}
-  .topbar .hint{font-size:12.5px;color:var(--muted);margin-left:auto}
+    border-radius:100px;padding:2px 10px;letter-spacing:.4px}
+  .topbar .hint{font-size:12px;color:var(--muted);margin-left:auto}
 
   .main{display:flex;flex:1;min-height:0}
-  .side{width:372px;overflow-y:auto;padding:14px;flex-shrink:0;background:var(--bg)}
+  .side{width:372px;overflow-y:auto;padding:12px;flex-shrink:0;background:var(--bg)}
   #map{flex:1;min-height:0;background:#0a1210}
   @media(max-width:800px){
     .main{flex-direction:column}
@@ -40,77 +40,77 @@
     #map{order:1;height:50vh;flex:none}
   }
 
-  .card{background:var(--card);border:1px solid var(--edge);border-radius:14px;
-    padding:14px 15px 13px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,40,32,.05)}
-  .card-head{display:flex;align-items:center;gap:9px;margin:0 0 12px}
-  .card-head .num{width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;
+  .card{background:var(--card);border:1px solid var(--edge);border-radius:13px;
+    padding:12px 13px 11px;margin-bottom:10px;box-shadow:0 1px 2px rgba(20,40,32,.05)}
+  .card-head{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+  .card-head .num{width:19px;height:19px;border-radius:50%;background:var(--ink);color:#fff;
     font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .card-head h2{font-size:13.5px;font-weight:700;margin:0;letter-spacing:.3px}
-  .card-head .sub{font-size:11px;color:var(--faint);margin-left:auto}
+  .card-head h2{font-size:13px;font-weight:700;margin:0;letter-spacing:.3px}
+  .card-head .sub{font-size:11px;color:var(--faint);margin-left:auto;text-align:right}
+  .card-head .sub.mono{font-family:var(--mono);color:var(--wind-ink)}
+  .card-head .sub.mono small{color:var(--faint)}
 
   label{display:flex;align-items:center;justify-content:space-between;gap:6px;
-    font-size:12px;font-weight:600;color:var(--muted);margin:0 0 5px;white-space:nowrap}
+    font-size:12px;font-weight:600;color:var(--muted);margin:0 0 4px;white-space:nowrap}
   label .unit{font-family:var(--mono);font-size:9.5px;font-weight:400;color:var(--faint);
     text-transform:uppercase;letter-spacing:.4px;background:var(--bg);border-radius:4px;padding:1px 4px;flex-shrink:0}
-  .field{margin-bottom:11px}
+  .field{margin-bottom:9px}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
-  input,select{width:100%;background:#fff;border:1px solid var(--edge-strong);border-radius:9px;
-    color:var(--ink);font-family:var(--mono);font-size:14.5px;padding:9px 10px;outline:none;
+  .side input,.side select{width:100%;background:#fff;border:1px solid var(--edge-strong);border-radius:9px;
+    color:var(--ink);font-family:var(--mono);font-size:14px;padding:8px 10px;outline:none;
     transition:border-color .12s, box-shadow .12s}
-  select{font-family:var(--sans);font-size:13.5px}
-  input:focus,select:focus{border-color:var(--signal);box-shadow:0 0 0 3px rgba(242,162,61,.18)}
+  .side select{font-family:var(--sans);font-size:13px}
+  .side input:focus,.side select:focus{border-color:var(--signal);box-shadow:0 0 0 3px rgba(242,162,61,.18)}
 
-  .est{font-size:11.5px;color:var(--faint);margin:2px 0 10px;line-height:1.5}
+  .est{font-size:11.5px;color:var(--faint);margin:2px 0 9px;line-height:1.5}
   .est b{color:var(--wind-ink);font-weight:650}
   .warn{font-size:12px;color:var(--danger-ink);background:#fdf0ef;border:1px solid #f3cfcc;
-    border-radius:8px;padding:8px 10px;margin:4px 0 2px;line-height:1.45}
+    border-radius:8px;padding:7px 10px;margin:6px 0 0;line-height:1.45}
 
-  details{background:var(--bg);border:1px solid var(--edge);border-radius:10px;padding:9px 11px;margin-top:4px}
-  summary{font-size:12.5px;font-weight:600;color:var(--wind-ink);cursor:pointer}
+  details{background:var(--bg);border:1px solid var(--edge);border-radius:10px;padding:8px 11px;margin-top:2px}
+  summary{font-size:12px;font-weight:600;color:var(--wind-ink);cursor:pointer}
   details .est{margin-top:8px}
-  details .row2{margin-top:2px}
+  details.footnote{background:transparent;border:none;padding:4px 4px 12px;margin-top:0}
+  details.footnote summary{color:var(--faint);font-weight:500}
+  details.footnote .est{margin:6px 0 0}
 
-  .windrose{display:flex;gap:14px;align-items:center;margin-bottom:4px}
-  .windrose svg{flex-shrink:0;cursor:pointer;touch-action:none;background:var(--bg);border-radius:50%}
-  .windrose .wr-txt{font-family:var(--mono);font-size:13px;color:var(--wind-ink)}
-  .windrose .wr-txt small{color:var(--faint)}
+  .wind-grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:10px;align-items:end}
+  .wind-grid svg{cursor:pointer;touch-action:none;background:var(--bg);border-radius:50%;display:block}
 
-  .chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);margin-top:2px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin-top:2px}
   .chk input{width:auto;accent-color:var(--signal)}
 
   /* bloc résultat : instrument sombre */
   .card.results{background:var(--instrument);border-color:var(--instrument-edge)}
   .card.results .card-head h2{color:#e9efeb}
   .card.results .card-head .num{background:var(--signal);color:#20140a}
-  .readout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--instrument-edge);
+  .readout{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--instrument-edge);
     border:1px solid var(--instrument-edge);border-radius:10px;overflow:hidden}
-  .cell{background:var(--instrument-2);padding:10px 12px}
-  .cell .k{font-size:10px;color:#7f958d;letter-spacing:.4px;text-transform:uppercase;margin-bottom:3px}
-  .cell .v{font-family:var(--mono);font-size:18px;color:var(--signal);line-height:1.1}
-  .cell .v small{font-size:10.5px;color:#5d6f67}
+  .cell{background:var(--instrument-2);padding:7px 10px}
+  .cell .k{font-size:9px;color:#7f958d;letter-spacing:.3px;text-transform:uppercase;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cell .v{font-family:var(--mono);font-size:15px;color:var(--signal);line-height:1.1;white-space:nowrap}
+  .cell .v small{font-size:10px;color:#5d6f67}
   .cell.arr{grid-column:1/-1;background:#0d1713}
-  .cell.arr .v{font-size:23px}
-  .cell.arr.bad .v{color:var(--danger);font-size:16px}
+  .cell.arr .v{font-size:20px}
+  .cell.arr.bad .v{color:var(--danger);font-size:14.5px}
   .cell.arr.good .v{color:var(--ok)}
-  .cell.arr .verdict{font-family:var(--sans);font-size:11.5px;margin-top:5px;color:#7f958d;line-height:1.4}
+  .cell.arr .verdict{font-family:var(--sans);font-size:11px;margin-top:4px;color:#7f958d;line-height:1.4}
   .cell.wind .v{color:var(--wind)}
 
-  .btns{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+  .btns{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
   button{font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;
-    border:1px solid var(--instrument-edge);background:transparent;color:#cfdad4;border-radius:9px;padding:8px 13px}
+    border:1px solid var(--instrument-edge);background:transparent;color:#cfdad4;border-radius:9px;padding:7px 13px}
   button.primary{background:var(--signal);color:#20140a;border-color:var(--signal)}
   button:hover{border-color:var(--signal)}
   #calBtn{border-color:var(--edge-strong);color:var(--ink);background:#fff;width:100%;margin-top:2px}
   #calBtn:hover{border-color:var(--signal)}
 
-  .note{font-size:11.5px;color:var(--faint);margin:2px 4px 14px;line-height:1.6}
-  .note b{color:var(--muted)}
-
   .maptip{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:500;
     background:rgba(16,27,23,.92);border-radius:100px;
     padding:7px 16px;font-size:12.5px;color:#e9efeb;pointer-events:none;transition:opacity .3s}
   .leaflet-container{background:#0a1210}
+  .leaflet-control-layers label{display:block;font-size:13px;color:#1c2b26;white-space:nowrap;margin:2px 0}
 </style>
 </head>
 <body>
@@ -130,16 +130,16 @@
           <div class="field"><label>Modèle</label><select id="wing"></select></div>
           <div class="field"><label>Taille <span class="unit">m²</span></label><select id="size"></select></div>
         </div>
-        <p class="est" id="wingEst"></p>
         <div class="row3">
           <div class="field"><label>Fin. best <span class="unit">L/D</span></label><input type="number" id="glide" step="0.1" min="1"></div>
           <div class="field"><label>Fin. planif <span class="unit">L/D</span></label><input type="number" id="glideMin" step="0.1" min="1"></div>
           <div class="field"><label>Vitesse <span class="unit">km/h</span></label><input type="number" id="vspeed" step="1" min="10"></div>
         </div>
-        <p class="est"><b>Fin. best</b> = ta meilleure finesse. <b>Fin. planif</b> = finesse prudente si tu n'es pas au best glide — c'est elle qui donne la garantie basse. Entre les deux : ta fourchette.</p>
         <details>
-          <summary>Calibrer avec un vol réel (recommandé)</summary>
-          <p class="est">Par vent quasi nul : distance parcourue ÷ hauteur perdue = ta vraie finesse.</p>
+          <summary>Aide · calibrer avec un vol réel</summary>
+          <p class="est" id="wingEst"></p>
+          <p class="est"><b>Fin. best</b> = ta meilleure finesse. <b>Fin. planif</b> = finesse prudente si tu n'es pas au best glide — c'est elle qui donne la garantie basse. Entre les deux : ta fourchette.</p>
+          <p class="est">Calibration par vent quasi nul : distance parcourue ÷ hauteur perdue = ta vraie finesse.</p>
           <div class="row2">
             <div class="field"><label>Distance <span class="unit">m</span></label><input type="number" id="calD" placeholder="ex. 900"></div>
             <div class="field"><label>H. perdue <span class="unit">m</span></label><input type="number" id="calH" placeholder="ex. 120"></div>
@@ -150,17 +150,14 @@
       </section>
 
       <section class="card">
-        <div class="card-head"><span class="num">2</span><h2>Le vent</h2><span class="sub">glisse la flèche sur la rose</span></div>
-        <div class="windrose">
+        <div class="card-head"><span class="num">2</span><h2>Le vent</h2><span class="sub mono" id="roseTxt">—</span></div>
+        <div class="wind-grid">
           <svg id="rose" width="82" height="82" viewBox="0 0 82 82"></svg>
-          <div style="flex:1">
-            <div class="wr-txt" id="roseTxt">—</div>
-            <div class="field" style="margin:8px 0 0"><label>Force <span class="unit">nœuds</span></label>
-              <input type="number" id="wind" value="10" step="1" min="0"></div>
-          </div>
+          <div class="field" style="margin:0"><label>Force <span class="unit">kt</span></label>
+            <input type="number" id="wind" value="10" step="1" min="0"></div>
+          <div class="field" style="margin:0"><label>De <span class="unit">° vrai</span></label>
+            <input type="number" id="wdir" value="270" step="5"></div>
         </div>
-        <div class="field" style="margin-top:8px"><label>Provenance <span class="unit">° vrai</span></label>
-          <input type="number" id="wdir" value="270" step="5"></div>
         <p class="warn" id="windWarn" style="display:none">⚠ Vent ≥ vitesse air : pénétration face au vent impossible. Les résultats face au vent ne sont pas fiables.</p>
       </section>
 
@@ -168,7 +165,7 @@
         <div class="card-head"><span class="num">3</span><h2>Altitudes &amp; marge</h2></div>
         <div class="row3">
           <div class="field"><label>Départ <span class="unit">m</span></label><input type="number" id="alt" value="700" step="10"></div>
-          <div class="field"><label>Sol arrivée <span class="unit">m</span></label><input type="number" id="ground" value="0" step="10"></div>
+          <div class="field"><label>Sol arr. <span class="unit">m</span></label><input type="number" id="ground" value="0" step="10"></div>
           <div class="field"><label>Marge <span class="unit">m</span></label><input type="number" id="margin" value="30" step="5"></div>
         </div>
         <div class="chk"><input type="checkbox" id="autoElev" checked><label for="autoElev" style="margin:0;font-weight:400">Altitude sol auto (relief) à l'arrivée</label></div>
@@ -191,11 +188,15 @@
         </div>
       </section>
 
-      <p class="note">
-        Finesses par défaut = <b>estimations</b> (Flare ne publie pas de polaire chiffrée) — calibre-les.
-        Sur la carte : zone pleine = atteignable en finesse de planif (sûr) ; contour pointillé = max au best glide.
-        Sol supposé plat à l'arrivée, relief intermédiaire non modélisé. Fonds © OpenStreetMap · Esri.
-      </p>
+      <details class="footnote">
+        <summary>Limites du modèle &amp; sources</summary>
+        <p class="est">
+          Finesses par défaut = <b>estimations</b> (Flare ne publie pas de polaire chiffrée) — calibre-les.
+          Sur la carte : zone pleine = atteignable en finesse de planif (sûr) ; contour pointillé = max au best glide.
+          Sol supposé plat à l'arrivée, relief intermédiaire non modélisé. Vent supposé uniforme et constant.
+          Fonds © OpenStreetMap · Esri.
+        </p>
+      </details>
     </div>
 
     <div id="map"><div class="maptip" id="tip">Clique pour poser le point de départ</div></div>

@@ -103,6 +103,15 @@
   .legs div{display:flex;justify-content:space-between;gap:8px}
   .legs b{color:#cfdad4;font-weight:600}
 
+  .ptlist{margin-top:8px;font-family:var(--mono);font-size:10.5px;color:#9fb2a9;max-height:96px;overflow-y:auto}
+  .ptlist .pt{display:flex;align-items:center;gap:7px;padding:2px 0;cursor:pointer}
+  .ptlist .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .ptlist .lbl{color:#cfdad4;font-weight:600;min-width:44px}
+  .ptlist .co{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ptlist .ptdel{margin-left:auto;background:none;border:none;color:var(--danger);cursor:pointer;
+    font-size:14px;line-height:1;padding:2px 6px;border-radius:6px}
+  .ptlist .ptdel:hover{background:rgba(229,84,77,.15);border:none}
+
   .btns{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
   button{font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;
     border:1px solid var(--instrument-edge);background:transparent;color:#cfdad4;border-radius:9px;padding:7px 13px}
@@ -134,7 +143,7 @@
   <div class="topbar">
     <div class="logo"><div class="mark">G</div><h1>GlideX</h1></div>
     <span class="tag">plané · dérive vent · relief</span>
-    <span class="hint">Clic sur la carte = ajouter un point (départ puis étapes). Clic droit sur un marqueur = le retirer.</span>
+    <span class="hint">Clic sur la carte = ajouter un point (départ puis étapes). Suppression : clic droit sur un marqueur, ou via la liste des points.</span>
   </div>
 
   <div class="main">
@@ -198,6 +207,7 @@
           <div class="cell"><div class="k">Δ alt. perdue</div><div class="v" id="vDrop">—</div></div>
           <div class="cell wind"><div class="k">Compo. vent</div><div class="v" id="vWc">—</div></div>
         </div>
+        <div class="ptlist" id="ptList" style="display:none"></div>
         <div class="legs" id="legList" style="display:none"></div>
         <div class="btns">
           <button class="primary" id="share">Partager le lien</button>
@@ -309,8 +319,26 @@
   function refreshIcons(){
     markers.forEach((m,i)=>m.setIcon(i===0?greenIcon:(i===markers.length-1?redIcon:midIcon)));
   }
+  function renderPtList(){
+    const el=$("ptList");
+    if(!pts.length){el.style.display="none";el.innerHTML="";return;}
+    el.style.display="block";
+    el.innerHTML=pts.map((q,i)=>{
+      const col=i===0?getCSS('--ok'):(i===pts.length-1?getCSS('--danger'):getCSS('--signal'));
+      const lbl=i===0?"Départ":(i===pts.length-1?"Arrivée":"P"+i);
+      return `<div class="pt" data-i="${i}"><span class="dot" style="background:${col}"></span>`+
+        `<span class="lbl">${lbl}</span><span class="co">${q.lat.toFixed(4)}, ${q.lng.toFixed(4)}</span>`+
+        `<button class="ptdel" data-del="${i}" title="Supprimer ce point">✕</button></div>`;
+    }).join("");
+  }
+  $("ptList").addEventListener("click",e=>{
+    const del=e.target.closest("[data-del]");
+    if(del){removePoint(+del.dataset.del);return;}
+    const row=e.target.closest("[data-i]");
+    if(row)map.panTo(pts[+row.dataset.i]);
+  });
   map.on("click",e=>addPoint(e.latlng));
-  map.on("moveend",()=>saveState());
+  map.on("moveend",()=>{updateShareUrl();saveState();});
   function tip(t){const el=$("tip");if(!t){el.style.opacity=0;setTimeout(()=>el.style.display="none",300);}else{el.style.display="";el.style.opacity=1;el.textContent=t;}}
 
   /* ---------- géo ---------- */
@@ -360,6 +388,7 @@
     const p=readParams();
     drawRose(((+$("wdir").value||0)%360+360)%360);
     $("windWarn").style.display = (p.w >= p.vx*0.985) ? "" : "none";
+    renderPtList();
 
     if(pts.length){
       const draw=(f,layer,style)=>{
@@ -591,6 +620,8 @@
     q.set("w",o.w);q.set("s",o.s);q.set("f",o.f);q.set("fm",o.fm);q.set("vs",o.vs);
     q.set("wd",o.wd);q.set("ws",o.ws);q.set("a",o.a);q.set("g",o.g);q.set("m",o.m);q.set("ae",o.ae);
     if(o.p.length)q.set("p",o.p.map(x=>x[0]+"~"+x[1]).join("_"));
+    const c=map.getCenter();
+    q.set("c",c.lat.toFixed(5)+"~"+c.lng.toFixed(5));q.set("z",map.getZoom());
     history.replaceState(null,"","#"+q.toString());
   }
   let saveTimer=null;
@@ -608,6 +639,8 @@
       const o={w:h.get("w"),s:h.get("s"),f:h.get("f"),fm:h.get("fm"),vs:h.get("vs"),wd:h.get("wd"),ws:h.get("ws"),
         a:h.get("a"),g:h.get("g"),m:h.get("m"),ae:h.get("ae"),p:[]};
       if(h.get("p"))o.p=h.get("p").split("_").map(s=>s.split("~").map(Number)).filter(x=>x.length===2&&isFinite(x[0])&&isFinite(x[1]));
+      if(h.get("c")){const cc=h.get("c").split("~").map(Number);if(cc.length===2&&isFinite(cc[0])&&isFinite(cc[1]))o.c=cc;}
+      if(h.get("z")&&isFinite(+h.get("z")))o.z=+h.get("z");
       return o;
     }
     try{const s=localStorage.getItem(LS_KEY);if(s)return JSON.parse(s);}catch(e){}
@@ -625,8 +658,10 @@
     if(st.g!=null)$("ground").value=st.g;
     if(st.m!=null)$("margin").value=st.m;
     if(st.ae!=null)$("autoElev").checked=!!+st.ae;
-    if(st.c&&st.z)map.setView(st.c,st.z);
     (st.p||[]).forEach(x=>addPoint(L.latLng(x[0],x[1]),true));
+    if(st.c&&st.z!=null)map.setView(st.c,st.z);
+    else if(pts.length>=2)map.fitBounds(L.latLngBounds(pts),{padding:[60,60]});
+    else if(pts.length===1)map.setView(pts[0],14);
     if(pts.length){tip("");}
     recompute();
   }

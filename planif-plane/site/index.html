@@ -92,11 +92,16 @@
   .cell .v{font-family:var(--mono);font-size:15px;color:var(--signal);line-height:1.1;white-space:nowrap}
   .cell .v small{font-size:10px;color:#5d6f67}
   .cell.arr{grid-column:1/-1;background:#0d1713}
-  .cell.arr .v{font-size:20px}
+  .cell.arr .v{font-size:20px;white-space:normal}
   .cell.arr.bad .v{color:var(--danger);font-size:14.5px}
   .cell.arr.good .v{color:var(--ok)}
   .cell.arr .verdict{font-family:var(--sans);font-size:11px;margin-top:4px;color:#7f958d;line-height:1.4}
+  .cell.arr .relief{font-family:var(--mono);font-size:11px;margin-top:3px;line-height:1.4}
   .cell.wind .v{color:var(--wind)}
+
+  .legs{font-family:var(--mono);font-size:10.5px;color:#9fb2a9;margin-top:8px;line-height:1.7}
+  .legs div{display:flex;justify-content:space-between;gap:8px}
+  .legs b{color:#cfdad4;font-weight:600}
 
   .btns{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
   button{font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;
@@ -111,14 +116,25 @@
     padding:7px 16px;font-size:12.5px;color:#e9efeb;pointer-events:none;transition:opacity .3s}
   .leaflet-container{background:#0a1210}
   .leaflet-control-layers label{display:block;font-size:13px;color:#1c2b26;white-space:nowrap;margin:2px 0}
+
+  /* profil de terrain */
+  #profWrap{position:absolute;left:10px;right:10px;bottom:10px;z-index:600;display:none;
+    background:rgba(16,27,23,.94);border:1px solid var(--instrument-edge);border-radius:12px;padding:7px 10px 5px}
+  .prof-head{display:flex;align-items:center;gap:10px;font-size:11px;margin-bottom:3px}
+  .prof-head .t{font-weight:600;color:#cfdad4}
+  .prof-head #profStatus{margin-left:auto;font-family:var(--mono);font-size:11px}
+  #profClose{background:none;border:none;color:#7f958d;font-size:15px;padding:0 3px;line-height:1;cursor:pointer}
+  #prof{display:block;width:100%;height:92px}
+  #profToggle{position:absolute;left:10px;bottom:10px;z-index:600;display:none;
+    background:rgba(16,27,23,.92);border:1px solid var(--instrument-edge);color:#cfdad4;font-size:12px}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="topbar">
     <div class="logo"><div class="mark">G</div><h1>GlideX</h1></div>
-    <span class="tag">plané · dérive vent · marge sécu</span>
-    <span class="hint">Sur la carte : clic 1 = départ, clic 2 = arrivée. Marqueurs déplaçables.</span>
+    <span class="tag">plané · dérive vent · relief</span>
+    <span class="hint">Clic sur la carte = ajouter un point (départ puis étapes). Clic droit sur un marqueur = le retirer.</span>
   </div>
 
   <div class="main">
@@ -172,18 +188,20 @@
       </section>
 
       <section class="card results">
-        <div class="card-head"><span class="num">4</span><h2>Résultat du leg</h2></div>
+        <div class="card-head"><span class="num">4</span><h2>Résultat de la route</h2><span class="sub" id="legCount"></span></div>
         <div class="readout">
-          <div class="cell arr" id="cArr"><div class="k">Hauteur au sol à l'arrivée</div><div class="v" id="vArr">—</div><div class="verdict" id="vVerdict"></div></div>
+          <div class="cell arr" id="cArr"><div class="k">Hauteur au sol à l'arrivée</div><div class="v" id="vArr">—</div><div class="verdict" id="vVerdict"></div><div class="relief" id="vRelief"></div></div>
           <div class="cell"><div class="k">Distance</div><div class="v" id="vDist">—</div></div>
-          <div class="cell"><div class="k">Cap</div><div class="v" id="vBear">—</div></div>
+          <div class="cell"><div class="k">Cap départ</div><div class="v" id="vBear">—</div></div>
           <div class="cell"><div class="k">Temps de vol</div><div class="v" id="vTime">—</div></div>
           <div class="cell"><div class="k">Vitesse sol moy.</div><div class="v" id="vGs">—</div></div>
-          <div class="cell"><div class="k">Δ altitude perdue</div><div class="v" id="vDrop">—</div></div>
-          <div class="cell wind"><div class="k">Compo. vent leg</div><div class="v" id="vWc">—</div></div>
+          <div class="cell"><div class="k">Δ alt. perdue</div><div class="v" id="vDrop">—</div></div>
+          <div class="cell wind"><div class="k">Compo. vent</div><div class="v" id="vWc">—</div></div>
         </div>
+        <div class="legs" id="legList" style="display:none"></div>
         <div class="btns">
-          <button class="primary" id="kml">Export KML</button>
+          <button class="primary" id="share">Partager le lien</button>
+          <button id="kml">KML</button>
           <button id="reset">Réinitialiser</button>
         </div>
       </section>
@@ -193,13 +211,20 @@
         <p class="est">
           Finesses par défaut = <b>estimations</b> (Flare ne publie pas de polaire chiffrée) — calibre-les.
           Sur la carte : zone pleine = atteignable en finesse de planif (sûr) ; contour pointillé = max au best glide.
-          Sol supposé plat à l'arrivée, relief intermédiaire non modélisé. Vent supposé uniforme et constant.
-          Fonds © OpenStreetMap · Esri.
+          Le relief sous la route est échantillonné (~profil en bas de carte) mais le vent est supposé uniforme et constant.
+          Réglages et route mémorisés dans ton navigateur. Fonds © OpenStreetMap · Esri. Élévation © open-meteo.
         </p>
       </details>
     </div>
 
-    <div id="map"><div class="maptip" id="tip">Clique pour poser le point de départ</div></div>
+    <div id="map">
+      <div class="maptip" id="tip">Clique pour poser le point de départ</div>
+      <div id="profWrap">
+        <div class="prof-head"><span class="t">Profil de terrain</span><span id="profStatus"></span><button id="profClose" title="Fermer">×</button></div>
+        <canvas id="prof"></canvas>
+      </div>
+      <button id="profToggle">⛰ Profil</button>
+    </div>
   </div>
 </div>
 
@@ -208,6 +233,8 @@
 (function(){
   "use strict";
   const $=id=>document.getElementById(id), D2R=Math.PI/180, KT=0.514444;
+  const LS_KEY="glidex_state_v1";
+  const INIT_HASH=location.hash; // avant toute écriture par updateShareUrl
 
   /* ---------- base de voiles ----------
      Tailles = officielles Flare (go-flare.com).
@@ -253,22 +280,37 @@
   sat.addTo(map);
   L.control.layers({"Satellite":sat,"Plan (OSM)":osm,"Topo":topo},null,{position:"topright"}).addTo(map);
 
-  let start=null,end=null,startM=null,endM=null,footBest=null,footCons=null,legLine=null,windLine=null;
-  const greenIcon=mkIcon(getCSS('--ok')),redIcon=mkIcon(getCSS('--danger'));
-  function mkIcon(col){return L.divIcon({className:"",html:
-    `<div style="width:18px;height:18px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
-     background:${col};border:2px solid #0c1311;box-shadow:0 0 0 2px ${col}55"></div>`,iconSize:[18,18],iconAnchor:[9,18]});}
+  /* ---------- route multi-points ---------- */
+  let pts=[],markers=[],footBest=null,footCons=null,routeLine=null,windLine=null;
+  function mkIcon(col,small){const s=small?13:18;return L.divIcon({className:"",html:
+    `<div style="width:${s}px;height:${s}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+     background:${col};border:2px solid #0c1311;box-shadow:0 0 0 2px ${col}55"></div>`,iconSize:[s,s],iconAnchor:[s/2,s]});}
+  const greenIcon=mkIcon(getCSS('--ok')),redIcon=mkIcon(getCSS('--danger')),midIcon=mkIcon(getCSS('--signal'),true);
 
-  map.on("click",e=>{
-    if(!start){setStart(e.latlng);tip("Clique pour poser le point d'arrivée");}
-    else{setEnd(e.latlng);tip("");}
-  });
-  function setStart(ll){start=ll;
-    if(!startM){startM=L.marker(ll,{icon:greenIcon,draggable:true}).addTo(map).on("drag",ev=>{start=ev.latlng;recompute();});}
-    else startM.setLatLng(ll); recompute();}
-  function setEnd(ll){end=ll;
-    if(!endM){endM=L.marker(ll,{icon:redIcon,draggable:true}).addTo(map).on("drag",ev=>{end=ev.latlng;fetchGround();recompute();});}
-    else endM.setLatLng(ll); fetchGround(); recompute();}
+  function addPoint(ll,silent){
+    pts.push(ll);
+    const mk=L.marker(ll,{icon:redIcon,draggable:true}).addTo(map);
+    mk.on("drag",ev=>{pts[markers.indexOf(mk)]=ev.latlng;recompute();});
+    mk.on("dragend",()=>{if(markers.indexOf(mk)===markers.length-1)fetchGround();saveState();});
+    mk.on("contextmenu",ev=>{if(ev.originalEvent)ev.originalEvent.preventDefault();removePoint(markers.indexOf(mk));});
+    markers.push(mk); refreshIcons();
+    if(!silent){
+      if(pts.length===1)tip("Clique pour poser l'arrivée (puis d'autres étapes si tu veux)");
+      else{tip("");fetchGround();}
+      recompute(); saveState();
+    }
+  }
+  function removePoint(i){
+    if(i<0)return;
+    map.removeLayer(markers[i]); markers.splice(i,1); pts.splice(i,1);
+    refreshIcons(); if(pts.length>=2)fetchGround();
+    recompute(); saveState();
+  }
+  function refreshIcons(){
+    markers.forEach((m,i)=>m.setIcon(i===0?greenIcon:(i===markers.length-1?redIcon:midIcon)));
+  }
+  map.on("click",e=>addPoint(e.latlng));
+  map.on("moveend",()=>saveState());
   function tip(t){const el=$("tip");if(!t){el.style.opacity=0;setTimeout(()=>el.style.display="none",300);}else{el.style.display="";el.style.opacity=1;el.textContent=t;}}
 
   /* ---------- géo ---------- */
@@ -298,37 +340,51 @@
     const disc=k*k*pu*pu+(1-k*k)*D*D;
     return{R0:(Math.sqrt(disc)-k*pu)/(1-k*k),wc:pu/D*p.w,D};
   }
+  // route complète : chaque leg enchaîné, pertes cumulées
+  function computeRoute(p){
+    const legs=[];let cumB=0,cumC=0,totD=0,totT=0,wcW=0;
+    for(let i=0;i+1<pts.length;i++){
+      const {dE,dN}=enu(pts[i],pts[i+1]);
+      const r=solveR0(dE,dN,p);
+      const D=map.distance(pts[i],pts[i+1]);
+      const dropB=r.R0/p.g,dropC=r.R0/p.gMin,t=r.R0/p.vx;
+      cumB+=dropB;cumC+=dropC;totD+=D;totT+=t;wcW+=r.wc*D;
+      legs.push({D,bear:bearing(pts[i],pts[i+1]),R0:r.R0,dropB,dropC,t,cumB,cumC});
+    }
+    return{legs,totD,totT,dropB:cumB,dropC:cumC,wc:totD>0?wcW/totD:0};
+  }
   const fmtT=s=>{s=Math.round(s);return Math.floor(s/60)+"'"+String(s%60).padStart(2,"0")+'"';};
+  const fmtD=m=>m<1000?Math.round(m)+" m":(m/1000).toFixed(2)+" km";
 
   function recompute(){
     const p=readParams();
     drawRose(((+$("wdir").value||0)%360+360)%360);
     $("windWarn").style.display = (p.w >= p.vx*0.985) ? "" : "none";
 
-    if(start){
+    if(pts.length){
       const draw=(f,layer,style)=>{
-        const R0=f*p.dh,Cx=R0*p.k*p.uE,Cy=R0*p.k*p.uN,pts=[];
-        for(let i=0;i<=72;i++){const a=i/72*2*Math.PI;pts.push(offset(start,Cx+R0*Math.cos(a),Cy+R0*Math.sin(a)));}
-        if(layer)layer.setLatLngs(pts); else layer=L.polygon(pts,style).addTo(map);
+        const R0=f*p.dh,Cx=R0*p.k*p.uE,Cy=R0*p.k*p.uN,poly=[];
+        for(let i=0;i<=72;i++){const a=i/72*2*Math.PI;poly.push(offset(pts[0],Cx+R0*Math.cos(a),Cy+R0*Math.sin(a)));}
+        if(layer)layer.setLatLngs(poly); else layer=L.polygon(poly,style).addTo(map);
         return layer;
       };
       footBest=draw(p.g,footBest,{color:getCSS('--signal'),weight:1.2,dashArray:"4 5",fill:false});
       footCons=draw(p.gMin,footCons,{color:getCSS('--signal'),weight:1.5,fillColor:getCSS('--signal'),fillOpacity:0.12});
-      const wl=Math.min(p.g*p.dh*0.45,600),wpts=[[start.lat,start.lng],offset(start,p.uE*wl,p.uN*wl)];
+      const wl=Math.min(p.g*p.dh*0.45,600),wpts=[[pts[0].lat,pts[0].lng],offset(pts[0],p.uE*wl,p.uN*wl)];
       if(windLine)windLine.setLatLngs(wpts);else windLine=L.polyline(wpts,{color:getCSS('--wind'),weight:3,dashArray:"1 6",lineCap:"round"}).addTo(map);
     }
 
-    if(!start||!end){blank();return;}
-    const {dE,dN}=enu(start,end),r=solveR0(dE,dN,p);
-    const dropBest=r.R0/p.g, dropCons=r.R0/p.gMin;
-    const aglBest=(p.alt-p.grd)-dropBest, aglCons=(p.alt-p.grd)-dropCons;
-    const time=r.R0/p.vx, dist=map.distance(start,end);
-    const gs=time>0?dist/time:0;
+    updateShareUrl();
+
+    if(pts.length<2){blank();scheduleTerrain();return;}
+    const R=computeRoute(p);
+    const aglBest=(p.alt-p.grd)-R.dropB, aglCons=(p.alt-p.grd)-R.dropC;
+    const gs=R.totT>0?R.totD/R.totT:0;
     const reach=aglCons>=-0.5, safe=aglCons>=p.mrg;
 
-    const lp=[[start.lat,start.lng],[end.lat,end.lng]];
-    if(legLine)legLine.setLatLngs(lp).setStyle({color:reach?getCSS('--ok'):getCSS('--danger')});
-    else legLine=L.polyline(lp,{color:getCSS('--ok'),weight:2}).addTo(map);
+    const lp=pts.map(q=>[q.lat,q.lng]);
+    if(routeLine)routeLine.setLatLngs(lp).setStyle({color:reach?getCSS('--ok'):getCSS('--danger')});
+    else routeLine=L.polyline(lp,{color:getCSS('--ok'),weight:2}).addTo(map);
 
     const c=$("cArr");c.className="cell arr "+(reach?"good":"bad");
     if(reach){
@@ -342,15 +398,152 @@
       $("vVerdict").innerHTML='✕ Hors de portée en finesse de planif';
       $("vVerdict").style.color=getCSS('--danger');
     }
-    $("vDist").innerHTML=(dist<1000?Math.round(dist)+' <small>m</small>':(dist/1000).toFixed(2)+' <small>km</small>');
-    $("vBear").innerHTML=Math.round(bearing(start,end))+' <small>°</small>';
-    $("vTime").innerHTML=fmtT(time);
+    $("vDist").innerHTML=fmtD(R.totD).replace(" ",' <small>')+'</small>';
+    $("vBear").innerHTML=Math.round(R.legs[0].bear)+' <small>°</small>';
+    $("vTime").innerHTML=fmtT(R.totT);
     $("vGs").innerHTML=(gs*3.6).toFixed(0)+' <small>km/h</small>';
-    $("vDrop").innerHTML=Math.round(dropBest)+'–'+Math.round(dropCons)+' <small>m</small>';
-    const wcKt=r.wc/KT;$("vWc").innerHTML=(wcKt>=0?'+':'')+wcKt.toFixed(1)+' <small>kt</small>';
+    $("vDrop").innerHTML=Math.round(R.dropB)+'–'+Math.round(R.dropC)+' <small>m</small>';
+    const wcKt=R.wc/KT;$("vWc").innerHTML=(wcKt>=0?'+':'')+wcKt.toFixed(1)+' <small>kt</small>';
+
+    $("legCount").textContent=R.legs.length>1?R.legs.length+" legs":"";
+    const ll=$("legList");
+    if(R.legs.length>1){
+      ll.style.display="";
+      ll.innerHTML=R.legs.map((lg,i)=>{
+        const hC=Math.round((p.alt-p.grd)-lg.cumC),hB=Math.round((p.alt-p.grd)-lg.cumB);
+        return `<div><span><b>L${i+1}</b> ${fmtD(lg.D)} · ${Math.round(lg.bear)}°</span><span>reste ${hC}–${hB} m</span></div>`;
+      }).join("");
+    } else ll.style.display="none";
+
+    scheduleTerrain();
   }
   function blank(){["vDist","vBear","vTime","vGs","vDrop","vWc"].forEach(i=>$(i).textContent="—");
-    $("cArr").className="cell arr";$("vArr").textContent="—";$("vVerdict").textContent="";}
+    $("cArr").className="cell arr";$("vArr").textContent="—";$("vVerdict").textContent="";$("vRelief").textContent="";
+    $("legCount").textContent="";$("legList").style.display="none";
+    if(routeLine){map.removeLayer(routeLine);routeLine=null;}
+    $("profWrap").style.display="none";$("profToggle").style.display="none";}
+
+  /* ---------- profil de terrain le long de la route ---------- */
+  let terr=null, terrTimer=null, terrPending=null, profClosed=false;
+  const sigOf=()=>pts.map(q=>q.lat.toFixed(4)+","+q.lng.toFixed(4)).join(";");
+  function scheduleTerrain(){
+    clearTimeout(terrTimer);
+    if(pts.length<2){terr=null;return;}
+    const sig=sigOf();
+    if(terr&&terr.sig===sig){renderProfile();return;}
+    $("profStatus").textContent="…";$("profStatus").style.color="#7f958d";
+    terrTimer=setTimeout(fetchTerrain,600);
+  }
+  function fetchTerrain(){
+    const sig=sigOf(); if(terrPending===sig)return; terrPending=sig;
+    // échantillons à intervalle régulier le long des legs
+    const Dl=[];let tot=0;
+    for(let i=0;i+1<pts.length;i++){const d=map.distance(pts[i],pts[i+1]);Dl.push(d);tot+=d;}
+    if(tot<10){terrPending=null;return;}
+    const N=Math.max(20,Math.min(80,Math.round(tot/50)));
+    const lats=[],lngs=[],ds=[];
+    for(let j=0;j<N;j++){
+      const d=j/(N-1)*tot;let acc=0,i=0;
+      while(i<Dl.length-1&&acc+Dl[i]<d){acc+=Dl[i];i++;}
+      const f=Dl[i]>0?(d-acc)/Dl[i]:0;
+      lats.push((pts[i].lat+(pts[i+1].lat-pts[i].lat)*f).toFixed(5));
+      lngs.push((pts[i].lng+(pts[i+1].lng-pts[i].lng)*f).toFixed(5));
+      ds.push(d);
+    }
+    fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lats.join(",")}&longitude=${lngs.join(",")}`)
+      .then(r=>r.json())
+      .then(j=>{
+        terrPending=null;
+        if(!j||!j.elevation||j.elevation.length!==N)throw 0;
+        if(sig!==sigOf())return; // la route a bougé entre temps
+        terr={sig,d:ds,z:j.elevation,tot,Dl};
+        renderProfile();
+      })
+      .catch(()=>{terrPending=null;$("profStatus").textContent="élévation indisponible";});
+  }
+  function pilotAlt(d,p,legs,Dl,useCons){
+    let acc=0,i=0;
+    while(i<Dl.length-1&&acc+Dl[i]<d){acc+=Dl[i];i++;}
+    const f=Dl[i]>0?Math.min(1,(d-acc)/Dl[i]):0;
+    const prev=i>0?(useCons?legs[i-1].cumC:legs[i-1].cumB):0;
+    const drop=useCons?legs[i].dropC:legs[i].dropB;
+    return p.alt-prev-f*drop;
+  }
+  function renderProfile(){
+    if(pts.length<2||!terr||terr.sig!==sigOf())return;
+    const p=readParams(),R=computeRoute(p);
+    const wrap=$("profWrap"),cv=$("prof");
+    if(!profClosed){wrap.style.display="block";$("profToggle").style.display="none";}
+    else{wrap.style.display="none";$("profToggle").style.display="block";}
+
+    // dégagement mini (finesse planif), en ignorant les 3 % initiaux (départ posé au sol)
+    let minClear=Infinity,minAt=0,crossAt=-1;
+    const consLine=terr.d.map(d=>pilotAlt(d,p,R.legs,terr.Dl,true));
+    const bestLine=terr.d.map(d=>pilotAlt(d,p,R.legs,terr.Dl,false));
+    terr.d.forEach((d,j)=>{
+      if(d<terr.tot*0.03)return;
+      const cl=consLine[j]-terr.z[j];
+      if(cl<minClear){minClear=cl;minAt=d;}
+      if(cl<0&&crossAt<0)crossAt=d;
+    });
+    const st=$("profStatus"),vr=$("vRelief");
+    if(crossAt>=0){
+      st.textContent="✕ relief coupé à "+fmtD(crossAt);st.style.color=getCSS('--danger');
+      vr.textContent="⛰ ✕ La trajectoire coupe le relief à "+fmtD(crossAt);vr.style.color=getCSS('--danger');
+    }else if(minClear<p.mrg){
+      st.textContent="⚠ passage bas : +"+Math.round(minClear)+" m à "+fmtD(minAt);st.style.color=getCSS('--signal');
+      vr.textContent="⛰ ⚠ Relief frôlé : +"+Math.round(minClear)+" m à "+fmtD(minAt);vr.style.color=getCSS('--signal');
+    }else{
+      st.textContent="✓ dégagé · mini +"+Math.round(minClear)+" m";st.style.color=getCSS('--ok');
+      vr.textContent="";
+    }
+
+    // dessin
+    const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;
+    cv.width=W*dpr;cv.height=H*dpr;
+    const g=cv.getContext("2d");g.scale(dpr,dpr);g.clearRect(0,0,W,H);
+    const PL=36,PR=6,PT=6,PB=14,iw=W-PL-PR,ih=H-PT-PB;
+    let zmin=Math.min(...terr.z,...consLine),zmax=Math.max(...terr.z,p.alt);
+    const pad=(zmax-zmin)*0.08+5;zmin-=pad;zmax+=pad;
+    const X=d=>PL+d/terr.tot*iw, Y=z=>PT+(1-(z-zmin)/(zmax-zmin))*ih;
+    // grille + labels alt
+    g.font="9px "+getComputedStyle(document.body).getPropertyValue("--mono");
+    g.fillStyle="#5d6f67";g.strokeStyle="#24382f";g.lineWidth=1;
+    for(let i=0;i<=2;i++){const z=zmin+(zmax-zmin)*i/2;const y=Y(z);
+      g.beginPath();g.moveTo(PL,y);g.lineTo(W-PR,y);g.stroke();
+      g.fillText(Math.round(z)+" m",2,y+3);}
+    // terrain
+    g.beginPath();g.moveTo(X(0),Y(terr.z[0]));
+    terr.d.forEach((d,j)=>g.lineTo(X(d),Y(terr.z[j])));
+    g.lineTo(X(terr.tot),H-PB);g.lineTo(X(0),H-PB);g.closePath();
+    g.fillStyle="rgba(74,97,87,.45)";g.fill();
+    g.beginPath();terr.d.forEach((d,j)=>{j?g.lineTo(X(d),Y(terr.z[j])):g.moveTo(X(d),Y(terr.z[j]));});
+    g.strokeStyle="#6e8a7d";g.lineWidth=1.4;g.stroke();
+    // étapes (verticales)
+    let acc=0;g.strokeStyle="#3a4f45";g.setLineDash([2,3]);
+    for(let i=0;i<terr.Dl.length-1;i++){acc+=terr.Dl[i];const x=X(acc);
+      g.beginPath();g.moveTo(x,PT);g.lineTo(x,H-PB);g.stroke();}
+    g.setLineDash([]);
+    // lignes pilote : best (pointillé) puis planif (pleine)
+    g.beginPath();terr.d.forEach((d,j)=>{j?g.lineTo(X(d),Y(bestLine[j])):g.moveTo(X(d),Y(bestLine[j]));});
+    g.strokeStyle=getCSS('--signal');g.lineWidth=1.2;g.setLineDash([4,4]);g.stroke();g.setLineDash([]);
+    g.beginPath();terr.d.forEach((d,j)=>{j?g.lineTo(X(d),Y(consLine[j])):g.moveTo(X(d),Y(consLine[j]));});
+    g.strokeStyle=getCSS('--signal');g.lineWidth=2;g.stroke();
+    // zone de collision en rouge
+    if(crossAt>=0){
+      g.beginPath();let started=false;
+      terr.d.forEach((d,j)=>{if(consLine[j]<terr.z[j]){const x=X(d);if(!started){g.moveTo(x,Y(terr.z[j]));started=true;}else g.lineTo(x,Y(terr.z[j]));}});
+      g.strokeStyle=getCSS('--danger');g.lineWidth=3;g.stroke();
+    }
+    // labels distance
+    g.fillStyle="#5d6f67";
+    g.fillText("0",PL,H-3);
+    const kmTxt=(terr.tot/1000).toFixed(1)+" km";
+    g.fillText(kmTxt,W-PR-g.measureText(kmTxt).width,H-3);
+  }
+  $("profClose").addEventListener("click",()=>{profClosed=true;renderProfile();});
+  $("profToggle").addEventListener("click",()=>{profClosed=false;renderProfile();});
+  window.addEventListener("resize",()=>renderProfile());
 
   /* ---------- rose ---------- */
   function drawRose(fromDeg){
@@ -375,16 +568,74 @@
     r.addEventListener("touchmove",e=>{if(on){set(e);e.preventDefault();}});r.addEventListener("touchend",()=>on=false);
   })();
 
-  /* ---------- altitude sol auto ---------- */
+  /* ---------- altitude sol auto (dernier point) ---------- */
   let elevTimer=null;
   function fetchGround(){
-    if(!$("autoElev").checked||!end)return;
+    if(!$("autoElev").checked||pts.length<2)return;
+    const last=pts[pts.length-1];
     clearTimeout(elevTimer);
     elevTimer=setTimeout(()=>{
-      fetch(`https://api.open-meteo.com/v1/elevation?latitude=${end.lat.toFixed(5)}&longitude=${end.lng.toFixed(5)}`)
-        .then(r=>r.json()).then(d=>{if(d&&d.elevation&&d.elevation.length){$("ground").value=Math.round(d.elevation[0]);recompute();}}).catch(()=>{});
+      fetch(`https://api.open-meteo.com/v1/elevation?latitude=${last.lat.toFixed(5)}&longitude=${last.lng.toFixed(5)}`)
+        .then(r=>r.json()).then(d=>{if(d&&d.elevation&&d.elevation.length){$("ground").value=Math.round(d.elevation[0]);recompute();saveState();}}).catch(()=>{});
     },250);
   }
+
+  /* ---------- partage & persistance ---------- */
+  function stateObj(){
+    return{w:$("wing").value,s:$("size").value,f:$("glide").value,fm:$("glideMin").value,vs:$("vspeed").value,
+      wd:$("wdir").value,ws:$("wind").value,a:$("alt").value,g:$("ground").value,m:$("margin").value,
+      ae:$("autoElev").checked?1:0,p:pts.map(q=>[+q.lat.toFixed(5),+q.lng.toFixed(5)])};
+  }
+  function updateShareUrl(){
+    const o=stateObj(),q=new URLSearchParams();
+    q.set("w",o.w);q.set("s",o.s);q.set("f",o.f);q.set("fm",o.fm);q.set("vs",o.vs);
+    q.set("wd",o.wd);q.set("ws",o.ws);q.set("a",o.a);q.set("g",o.g);q.set("m",o.m);q.set("ae",o.ae);
+    if(o.p.length)q.set("p",o.p.map(x=>x[0]+"~"+x[1]).join("_"));
+    history.replaceState(null,"","#"+q.toString());
+  }
+  let saveTimer=null;
+  function saveState(){
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>{
+      const o=stateObj();const c=map.getCenter();
+      o.c=[+c.lat.toFixed(5),+c.lng.toFixed(5)];o.z=map.getZoom();
+      try{localStorage.setItem(LS_KEY,JSON.stringify(o));}catch(e){}
+    },400);
+  }
+  function loadState(){
+    const h=new URLSearchParams(INIT_HASH.slice(1));
+    if(h.has("p")||h.has("f")){
+      const o={w:h.get("w"),s:h.get("s"),f:h.get("f"),fm:h.get("fm"),vs:h.get("vs"),wd:h.get("wd"),ws:h.get("ws"),
+        a:h.get("a"),g:h.get("g"),m:h.get("m"),ae:h.get("ae"),p:[]};
+      if(h.get("p"))o.p=h.get("p").split("_").map(s=>s.split("~").map(Number)).filter(x=>x.length===2&&isFinite(x[0])&&isFinite(x[1]));
+      return o;
+    }
+    try{const s=localStorage.getItem(LS_KEY);if(s)return JSON.parse(s);}catch(e){}
+    return null;
+  }
+  function applyState(st){
+    if(st.w&&WINGS[st.w]){$("wing").value=st.w;fillSizes();}
+    if(st.s!=null&&WINGS[$("wing").value].sizes[st.s]!==undefined){$("size").value=st.s;applyWing();}
+    if(st.f!=null)$("glide").value=st.f;
+    if(st.fm!=null)$("glideMin").value=st.fm;
+    if(st.vs!=null)$("vspeed").value=st.vs;
+    if(st.wd!=null)$("wdir").value=st.wd;
+    if(st.ws!=null)$("wind").value=st.ws;
+    if(st.a!=null)$("alt").value=st.a;
+    if(st.g!=null)$("ground").value=st.g;
+    if(st.m!=null)$("margin").value=st.m;
+    if(st.ae!=null)$("autoElev").checked=!!+st.ae;
+    if(st.c&&st.z)map.setView(st.c,st.z);
+    (st.p||[]).forEach(x=>addPoint(L.latLng(x[0],x[1]),true));
+    if(pts.length){tip("");}
+    recompute();
+  }
+  $("share").addEventListener("click",()=>{
+    updateShareUrl();
+    const done=()=>{const b=$("share"),t=b.textContent;b.textContent="Lien copié ✓";setTimeout(()=>b.textContent=t,1600);};
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(location.href).then(done).catch(()=>prompt("Copie ce lien :",location.href));
+    else prompt("Copie ce lien :",location.href);
+  });
 
   /* ---------- calibration ---------- */
   $("calBtn").addEventListener("click",()=>{
@@ -393,46 +644,55 @@
       $("wing").value="custom";const s=$("size");s.innerHTML="";const o=document.createElement("option");o.value="—";o.textContent="—";s.appendChild(o);
       $("wingEst").textContent="Finesse mesurée en vol.";}
     if(V>0)$("vspeed").value=Math.round(V);
-    recompute();
+    recompute();saveState();
   });
 
   /* ---------- KML ---------- */
   $("kml").addEventListener("click",()=>{
-    if(!start){alert("Pose d'abord un point de départ.");return;}
+    if(!pts.length){alert("Pose d'abord un point de départ.");return;}
     const p=readParams(),R0=p.gMin*p.dh,Cx=R0*p.k*p.uE,Cy=R0*p.k*p.uN;
-    let ring="";for(let i=0;i<=72;i++){const a=i/72*2*Math.PI;const ll=offset(start,Cx+R0*Math.cos(a),Cy+R0*Math.sin(a));ring+=ll[1].toFixed(6)+","+ll[0].toFixed(6)+",0 ";}
-    const dwn=offset(start,p.uE*R0*(1+p.k),p.uN*R0*(1+p.k));
-    let ends=end?`<Placemark><name>Arrivee</name><Point><coordinates>${end.lng.toFixed(6)},${end.lat.toFixed(6)},0</coordinates></Point></Placemark>`:"";
+    let ring="";for(let i=0;i<=72;i++){const a=i/72*2*Math.PI;const ll=offset(pts[0],Cx+R0*Math.cos(a),Cy+R0*Math.sin(a));ring+=ll[1].toFixed(6)+","+ll[0].toFixed(6)+",0 ";}
+    const dwn=offset(pts[0],p.uE*R0*(1+p.k),p.uN*R0*(1+p.k));
+    const wpts=pts.map((q,i)=>`<Placemark><name>${i===0?"Depart":"P"+i}</name><Point><coordinates>${q.lng.toFixed(6)},${q.lat.toFixed(6)},0</coordinates></Point></Placemark>`).join("\n");
+    const route=pts.length>=2?`<Placemark><name>Route</name><LineString><coordinates>${pts.map(q=>q.lng.toFixed(6)+","+q.lat.toFixed(6)+",0").join(" ")}</coordinates></LineString></Placemark>`:"";
     const kml=`<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2"><Document>
 <name>Plane ${Math.round(p.dh)}m finesse ${p.gMin} (planif) vent ${$("wind").value}kt</name>
 <Style id="c"><LineStyle><color>ff3da2f2</color><width>2</width></LineStyle><PolyStyle><color>553da2f2</color></PolyStyle></Style>
-<Placemark><name>Depart</name><Point><coordinates>${start.lng.toFixed(6)},${start.lat.toFixed(6)},0</coordinates></Point></Placemark>
-${ends}
+${wpts}
+${route}
 <Placemark><name>Max sous le vent (~${(R0*(1+p.k)/1000).toFixed(1)} km)</name><Point><coordinates>${dwn[1].toFixed(6)},${dwn[0].toFixed(6)},0</coordinates></Point></Placemark>
 <Placemark><name>Zone atteignable (planif)</name><styleUrl>#c</styleUrl><Polygon><outerBoundaryIs><LinearRing><coordinates>${ring.trim()}</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
 </Document></kml>`;
     const url=URL.createObjectURL(new Blob([kml],{type:"application/vnd.google-earth.kml+xml"}));
-    const a=document.createElement("a");a.href=url;a.download="plane.kml";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+    const a=document.createElement("a");a.href=url;a.download="glidex.kml";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
   });
 
   $("reset").addEventListener("click",()=>{
-    [startM,endM,footBest,footCons,legLine,windLine].forEach(l=>l&&map.removeLayer(l));
-    start=end=startM=endM=footBest=footCons=legLine=windLine=null;blank();
-    $("tip").style.display="";$("tip").style.opacity=1;$("tip").textContent="Clique pour poser le point de départ";recompute();
+    markers.forEach(m=>map.removeLayer(m));
+    [footBest,footCons,routeLine,windLine].forEach(l=>l&&map.removeLayer(l));
+    pts=[];markers=[];footBest=footCons=routeLine=windLine=null;terr=null;blank();
+    $("tip").style.display="";$("tip").style.opacity=1;$("tip").textContent="Clique pour poser le point de départ";
+    recompute();saveState();
   });
 
   function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 
-  $("wing").addEventListener("change",fillSizes);
-  $("size").addEventListener("change",applyWing);
-  ["glide","glideMin","vspeed","wind","wdir","alt","ground","margin"].forEach(i=>$(i).addEventListener("input",recompute));
-  $("autoElev").addEventListener("change",fetchGround);
+  $("wing").addEventListener("change",()=>{fillSizes();saveState();});
+  $("size").addEventListener("change",()=>{applyWing();saveState();});
+  ["glide","glideMin","vspeed","wind","wdir","alt","ground","margin"].forEach(i=>$(i).addEventListener("input",()=>{recompute();saveState();}));
+  $("autoElev").addEventListener("change",()=>{fetchGround();saveState();});
 
+  /* ---------- init ---------- */
   fillWings();
-  setStart(L.latLng(36.0143,-5.6044));
-  setEnd(L.latLng(36.0143,-5.59885));
-  tip("");
+  const st=loadState();
+  if(st&&(st.p&&st.p.length||st.f)){
+    applyState(st);
+  }else{
+    addPoint(L.latLng(36.0143,-5.6044),true);
+    addPoint(L.latLng(36.0143,-5.59885),true);
+    fetchGround();recompute();tip("");
+  }
 })();
 </script>
 </body>

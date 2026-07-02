@@ -1,0 +1,58 @@
+{
+  "_meta": {
+    "description": "Base voiles pour Planif Plane. f = finesse air best glide, v = vitesse best glide (km/h).",
+    "warning": "Les valeurs f et v sont des ESTIMATIONS. Flare ne publie pas de polaire chiffree. A remplacer via tracklogs (voir docs/derive-polaire-depuis-tracklogs.md) ou les 'Performance Data' constructeur.",
+    "sizesSource": "Tailles officielles verifiees sur go-flare.com",
+    "confidenceScale": ["estimate", "measured", "manufacturer"]
+  },
+  "wings": {
+    "flare_bandit": {
+      "name": "Flare Bandit",
+      "type": "parakite",
+      "aspectRatioBySize": { "10": 6.5, "13": 6.8, "16": 7.0, "19": 7.0, "22": 7.1 },
+      "sizes": {
+        "10": { "f": 7.0, "v": 46, "source": "estimate" },
+        "13": { "f": 7.5, "v": 45, "source": "estimate" },
+        "16": { "f": 8.0, "v": 44, "source": "estimate" },
+        "19": { "f": 8.3, "v": 43, "source": "estimate" },
+        "22": { "f": 8.5, "v": 42, "source": "estimate" }
+      }
+    },
+    "flare_moustache2": {
+      "name": "Flare Moustache 2",
+      "type": "parakite",
+      "sizes": {
+        "13": { "f": 6.5, "v": 45, "source": "estimate" },
+        "15": { "f": 6.8, "v": 44, "source": "estimate" },
+        "18": { "f": 7.2, "v": 43, "source": "estimate" },
+        "22": { "f": 7.6, "v": 41, "source": "estimate" },
+        "26": { "f": 7.9, "v": 39, "source": "estimate" }
+      }
+    },
+    "flare_moustache": {
+      "name": "Flare Moustache 1",
+      "type": "parakite",
+      "sizesToConfirm": true,
+      "sizes": {
+        "15": { "f": 6.4, "v": 44, "source": "estimate" },
+        "18": { "f": 6.8, "v": 43, "source": "estimate" },
+        "20": { "f": 7.0, "v": 42, "source": "estimate" },
+        "22": { "f": 7.2, "v": 41, "source": "estimate" }
+      }
+    },
+    "paraglider_b": {
+      "name": "Parapente EN-B (generique)",
+      "type": "paraglider",
+      "sizes": {
+        "-": { "f": 9.0, "v": 38, "source": "estimate" }
+      }
+    },
+    "custom": {
+      "name": "Custom / mesure",
+      "type": "custom",
+      "sizes": {
+        "-": { "f": 8.0, "v": 44, "source": "free" }
+      }
+    }
+  }
+}

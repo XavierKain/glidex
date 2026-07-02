@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planif Plané — cône de vol & dérive vent</title>
+<style>
+  :root{
+    --bg:#0c1311; --panel:#12201c; --panel-2:#0f1a17; --edge:#1e332d;
+    --ink:#e9efeb; --muted:#7f958d; --faint:#42544d;
+    --grid:#182823; --topo:#16241f;
+    --signal:#f2a23d;      /* altitude / plané */
+    --wind:#43ccd6;        /* vent */
+    --danger:#e5544d;      /* inatteignable */
+    --ok:#79d29a;
+    --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+  body{padding:22px;max-width:1140px;margin:0 auto;-webkit-font-smoothing:antialiased}
+
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  header h1{font-size:19px;font-weight:650;letter-spacing:.2px;margin:0}
+  header .tag{font-family:var(--mono);font-size:11px;color:var(--wind);
+    border:1px solid var(--edge);border-radius:100px;padding:3px 9px;letter-spacing:.6px;text-transform:uppercase}
+  header p{color:var(--muted);font-size:13px;margin:2px 0 18px;flex-basis:100%}
+
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:16px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+
+  .panel{background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--edge);border-radius:14px;padding:16px}
+
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--faint);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--edge)}
+
+  label{display:block;font-size:12px;color:var(--muted);margin:0 0 5px}
+  .field{margin-bottom:13px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  input[type=number]{width:100%;background:#0a120f;border:1px solid var(--edge);border-radius:8px;
+    color:var(--ink);font-family:var(--mono);font-size:15px;padding:9px 10px;outline:none}
+  input[type=number]:focus{border-color:var(--signal)}
+  .unit{font-family:var(--mono);font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.5px}
+  label .unit{float:right}
+
+  .readout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--edge);
+    border:1px solid var(--edge);border-radius:10px;overflow:hidden;margin-top:2px}
+  .cell{background:var(--panel-2);padding:11px 12px}
+  .cell .k{font-size:10.5px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase;margin-bottom:3px}
+  .cell .v{font-family:var(--mono);font-size:20px;color:var(--signal);line-height:1.05}
+  .cell .v small{font-size:11px;color:var(--faint)}
+  .cell.span{grid-column:1/-1}
+  .cell.wind .v{color:var(--wind)}
+  .cell.arr .v{font-size:26px}
+  .cell.bad .v{color:var(--danger)}
+  .cell.good .v{color:var(--ok)}
+
+  canvas{width:100%;height:auto;display:block;border-radius:10px;background:
+    radial-gradient(120% 120% at 50% 30%, #0f1c18 0%, #0a1210 70%)}
+  .caption{font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.5}
+  .caption b{color:var(--ink);font-weight:600}
+
+  .btns{display:flex;gap:9px;margin-top:13px;flex-wrap:wrap}
+  button{font-family:var(--sans);font-size:12.5px;font-weight:550;cursor:pointer;
+    border:1px solid var(--edge);background:#0a120f;color:var(--ink);border-radius:8px;padding:9px 13px}
+  button.primary{background:var(--signal);color:#20140a;border-color:var(--signal)}
+  button:hover{border-color:var(--signal)}
+  button.primary:hover{filter:brightness(1.06)}
+
+  .note{font-size:11px;color:var(--faint);margin-top:14px;line-height:1.6;
+    border-top:1px solid var(--edge);padding-top:11px}
+  .note code{font-family:var(--mono);color:var(--muted)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:9px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .swatch{width:11px;height:11px;border-radius:3px;display:inline-block}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Planif Plané</h1>
+  <span class="tag">cône de vol · dérive vent</span>
+  <p>Ta finesse <em>sol</em> change avec le vent. Entre ta polaire et le vent, clique sur la carte (ou saisis un point) pour lire l'altitude d'arrivée. Export KML pour Google&nbsp;My&nbsp;Maps / Google&nbsp;Earth.</p>
+</header>
+
+<div class="grid">
+
+  <!-- ============ COLONNE GAUCHE : ENTRÉES ============ -->
+  <div class="panel">
+    <p class="eyebrow">Aile &amp; conditions</p>
+
+    <div class="field">
+      <label>Finesse air max <span class="unit">L/D</span></label>
+      <input type="number" id="glide" value="9" step="0.1" min="1">
+    </div>
+    <div class="field">
+      <label>Vitesse au best glide <span class="unit">km/h</span></label>
+      <input type="number" id="vspeed" value="38" step="1" min="10">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Altitude départ <span class="unit">m</span></label>
+        <input type="number" id="alt" value="700" step="10">
+      </div>
+      <div class="field">
+        <label>Altitude sol/cible <span class="unit">m</span></label>
+        <input type="number" id="ground" value="0" step="10">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Vent <span class="unit">nœuds</span></label>
+        <input type="number" id="wind" value="10" step="1" min="0">
+      </div>
+      <div class="field">
+        <label>Vent venant de <span class="unit">° vrai</span></label>
+        <input type="number" id="wdir" value="270" step="5">
+      </div>
+    </div>
+
+    <p class="eyebrow" style="margin-top:18px">Point visé</p>
+    <div class="row2">
+      <div class="field">
+        <label>Distance sol <span class="unit">m</span></label>
+        <input type="number" id="tdist" value="500" step="10" min="0">
+      </div>
+      <div class="field">
+        <label>Cap vers cible <span class="unit">° vrai</span></label>
+        <input type="number" id="tbear" value="90" step="5">
+      </div>
+    </div>
+
+    <div class="readout">
+      <div class="cell arr" id="cArr"><div class="k">Altitude d'arrivée</div><div class="v" id="vArr">—</div></div>
+      <div class="cell"><div class="k">Δ altitude perdue</div><div class="v" id="vDrop">—</div></div>
+      <div class="cell"><div class="k">Finesse sol (ce leg)</div><div class="v" id="vGgr">—</div></div>
+      <div class="cell wind"><div class="k">Compo. vent leg</div><div class="v" id="vWc">—</div></div>
+    </div>
+
+    <p class="note">
+      Le point visé se déplace aussi en <b style="color:var(--ink)">cliquant sur la carte</b>.
+      Convention : « vent venant de » = provenance (270° = vent d'ouest, il te pousse vers l'est).
+    </p>
+  </div>
+
+  <!-- ============ COLONNE DROITE : CARTE ============ -->
+  <div class="panel">
+    <p class="eyebrow">Empreinte atteignable · vue du dessus</p>
+    <canvas id="cv" width="720" height="560"></canvas>
+
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--signal);opacity:.35"></i> zone atteignable</span>
+      <span><i class="swatch" style="background:var(--wind)"></i> vecteur vent (dérive)</span>
+      <span><i class="swatch" style="border:1px solid var(--signal);background:transparent"></i> anneaux iso-altitude</span>
+    </div>
+
+    <div class="readout" style="margin-top:12px">
+      <div class="cell"><div class="k">Portée max sous le vent</div><div class="v" id="vDown">—</div></div>
+      <div class="cell"><div class="k">Portée max contre le vent</div><div class="v" id="vUp">—</div></div>
+      <div class="cell"><div class="k">Portée travers vent</div><div class="v" id="vCross">—</div></div>
+      <div class="cell wind"><div class="k">Dérive du centre</div><div class="v" id="vShift">—</div></div>
+    </div>
+
+    <p class="eyebrow" style="margin-top:18px">Export Google Maps</p>
+    <div class="row2">
+      <div class="field">
+        <label>Latitude départ <span class="unit">°</span></label>
+        <input type="number" id="lat" value="36.0143" step="0.0001">
+      </div>
+      <div class="field">
+        <label>Longitude départ <span class="unit">°</span></label>
+        <input type="number" id="lon" value="-5.6044" step="0.0001">
+      </div>
+    </div>
+    <div class="btns">
+      <button class="primary" id="kml">Télécharger le KML</button>
+      <button id="reset">Réinitialiser le point</button>
+    </div>
+    <p class="note">
+      Le KML contient l'empreinte de plané, le point de départ et le point le plus loin sous le vent.
+      Import : <code>Google My Maps → Importer</code> ou ouvre-le dans <code>Google Earth</code>.
+    </p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const KT = 0.514444;        // nœud -> m/s
+  const D2R = Math.PI/180;
+
+  const ids = ["glide","vspeed","alt","ground","wind","wdir","tdist","tbear","lat","lon"];
+  const els = {}; ids.forEach(i => els[i] = $(i));
+
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const cx = W*0.5, cy = H*0.56;   // origine (point de départ) un peu bas pour laisser voir le downwind en haut
+
+  // état courant du modèle (rempli par compute)
+  let M = {};
+
+  function readInputs(){
+    const g   = Math.max(0.5, +els.glide.value || 0);
+    const vk  = Math.max(1, +els.vspeed.value || 0);
+    const vx  = vk/3.6;                         // m/s (horizontal ~ air)
+    const alt = +els.alt.value || 0;
+    const grd = +els.ground.value || 0;
+    const w   = Math.max(0,(+els.wind.value||0))*KT;   // m/s
+    const wfrom = ((+els.wdir.value||0)%360+360)%360;
+    const wtoward = (wfrom+180)%360;
+    // unité du vecteur "vers où souffle le vent", en repère (Est,Nord)
+    const uE = Math.sin(wtoward*D2R), uN = Math.cos(wtoward*D2R);
+    const k = Math.min(vx>0 ? w/vx : 0, 0.985);  // borne pour rester borné
+    const dh = Math.max(0, alt-grd);             // hauteur exploitable
+    return {g,vx,vk,alt,grd,w,wfrom,wtoward,uE,uN,k,dh};
+  }
+
+  // altitude d'arrivée pour un point sol (E,N) en mètres depuis l'origine
+  function solveDrop(E,N,m){
+    const D = Math.hypot(E,N);
+    if(D < 1e-6) return {drop:0, ggr:Infinity, wc:0, D:0};
+    const pu = E*m.uE + N*m.uN;                  // projection sur l'axe du vent (+ = sous le vent)
+    const k = m.k;
+    // R0(k²-1) - 2k·pu·R0 + D² = 0   (modèle cercle décalé)
+    const disc = k*k*pu*pu + (1-k*k)*D*D;
+    const R0 = (Math.sqrt(disc) - k*pu)/(1-k*k); // racine physique (>0)
+    const drop = R0/m.g;                          // Δh = R0 / finesse air
+    return {drop, ggr:D/drop, wc:pu/D*m.w, D};    // wc = compo vent projetée sur le leg (m/s)
+  }
+
+  function compute(){
+    const m = readInputs(); M = m;
+
+    // ---- point visé (distance + cap) ----
+    const D = Math.max(0, +els.tdist.value||0);
+    const b = ((+els.tbear.value||0)%360+360)%360;
+    const E = D*Math.sin(b*D2R), N = D*Math.cos(b*D2R);
+    const r = solveDrop(E,N,m);
+    const arr = m.alt - r.drop;
+    const reachable = r.drop <= m.dh + 1e-6;
+
+    setArr(arr, reachable, m.grd);
+    txt("vDrop", r.drop.toFixed(0)+" <small>m</small>");
+    txt("vGgr", isFinite(r.ggr)? r.ggr.toFixed(1) : "—");
+    const wcKt = (r.wc/KT);
+    txt("vWc", (wcKt>=0?"+":"")+wcKt.toFixed(1)+" <small>kt</small>");
+
+    // ---- géométrie empreinte (hauteur exploitable dh) ----
+    const R0 = m.g*m.dh;
+    m.R0 = R0;
+    m.Cx = R0*m.k*m.uE;  m.Cy = R0*m.k*m.uN;     // centre décalé sous le vent
+    txt("vDown",  (R0*(1+m.k)/1000).toFixed(2)+" <small>km</small>");
+    txt("vUp",    (R0*(1-m.k)/1000).toFixed(2)+" <small>km</small>");
+    txt("vCross", (R0*Math.sqrt(1-m.k*m.k)/1000).toFixed(2)+" <small>km</small>");
+    txt("vShift", (R0*m.k/1000).toFixed(2)+" <small>km</small>");
+
+    // échelle carte : tout tenir avec marge
+    const maxR = R0*(1+m.k);
+    m.scale = maxR>0 ? (Math.min(W,H)*0.5 - 46)/maxR : 1;
+    m.tE=E; m.tN=N; m.tArr=arr; m.tReach=reachable; m.tDrop=r.drop;
+    draw();
+  }
+
+  function setArr(arr, reach, grd){
+    const c = $("cArr");
+    c.className = "cell arr " + (reach?"good":"bad");
+    txt("vArr", reach ? Math.round(arr)+' <small>m</small>'
+                      : 'sol avant<br><span style="font-size:14px">('+Math.round(-(arr-grd))+' m manquants)</span>');
+  }
+  function txt(id,html){ $(id).innerHTML = html; }
+
+  // ---------- rendu carte ----------
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const s = M.scale;
+    const toX = E => cx + E*s, toY = N => cy - N*s;
+
+    // grille topo
+    ctx.strokeStyle = getCSS('--topo'); ctx.lineWidth=1;
+    const stepPx = 40;
+    for(let x=cx%stepPx;x<W;x+=stepPx){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=cy%stepPx;y<H;y+=stepPx){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    // empreinte atteignable (cercle décalé)
+    const CxPx=toX(M.Cx), CyPx=toY(M.Cy), Rpx=M.R0*s;
+    const grad = ctx.createRadialGradient(CxPx,CyPx,Rpx*0.2,CxPx,CyPx,Rpx);
+    grad.addColorStop(0,"rgba(242,162,61,0.20)");
+    grad.addColorStop(1,"rgba(242,162,61,0.05)");
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.arc(CxPx,CyPx,Rpx,0,7);ctx.fill();
+    ctx.strokeStyle="rgba(242,162,61,0.55)";ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(CxPx,CyPx,Rpx,0,7);ctx.stroke();
+
+    // anneaux iso-altitude (fractions de la hauteur exploitable)
+    ctx.font="10px "+getCSS('--mono');
+    [0.25,0.5,0.75].forEach(f=>{
+      const rr=Rpx*f, ccx=toX(M.Cx*f), ccy=toY(M.Cy*f);
+      ctx.strokeStyle="rgba(242,162,61,0.22)";ctx.setLineDash([3,4]);
+      ctx.beginPath();ctx.arc(ccx,ccy,rr,0,7);ctx.stroke();ctx.setLineDash([]);
+      const lostAlt = Math.round(M.grd + M.dh*(1-f));
+      ctx.fillStyle=getCSS('--faint');
+      ctx.fillText(lostAlt+" m", ccx+rr*0.70, ccy - rr*0.70);
+    });
+
+    // rose des vents (N/E/S/O) + graduation
+    ctx.strokeStyle=getCSS('--grid');ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(W,cy);ctx.moveTo(cx,0);ctx.lineTo(cx,H);ctx.stroke();
+    ctx.fillStyle=getCSS('--muted');ctx.font="11px "+getCSS('--sans');ctx.textAlign="center";
+    ctx.fillText("N",cx,14);ctx.fillText("S",cx,H-6);
+    ctx.textAlign="left";ctx.fillText("E",W-14,cy-6);
+    ctx.textAlign="right";ctx.fillText("O",14,cy-6);
+    ctx.textAlign="left";
+
+    // vecteur vent (dérive) depuis l'origine
+    const wLen=Math.min(W,H)*0.16;
+    const wx=cx+M.uE*wLen, wy=cy-M.uN*wLen;
+    ctx.strokeStyle=getCSS('--wind');ctx.fillStyle=getCSS('--wind');ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(wx,wy);ctx.stroke();
+    arrowHead(wx,wy,Math.atan2(-(M.uN),M.uE));
+    ctx.font="11px "+getCSS('--mono');
+    ctx.fillText((+els.wind.value||0)+" kt", wx+6, wy+4);
+
+    // origine (point de départ)
+    ctx.fillStyle=getCSS('--ink');
+    ctx.beginPath();ctx.arc(cx,cy,4,0,7);ctx.fill();
+    ctx.strokeStyle=getCSS('--ink');ctx.lineWidth=1;
+    ctx.beginPath();ctx.arc(cx,cy,8,0,7);ctx.stroke();
+
+    // point visé
+    const px=toX(M.tE), py=toY(M.tN);
+    const col = M.tReach ? getCSS('--ok') : getCSS('--danger');
+    ctx.strokeStyle=col;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,py);ctx.stroke();
+    ctx.fillStyle=col;
+    ctx.beginPath();ctx.arc(px,py,5,0,7);ctx.fill();
+    ctx.fillStyle=getCSS('--ink');ctx.font="12px "+getCSS('--mono');
+    const lbl = M.tReach ? Math.round(M.tArr)+" m" : "✕ sol";
+    ctx.fillText(lbl, px+9, py-8);
+
+    // barre d'échelle
+    scaleBar(s);
+  }
+
+  function arrowHead(x,y,ang){
+    const a=8;
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x-a*Math.cos(ang-0.4), y-a*Math.sin(ang-0.4));
+    ctx.lineTo(x-a*Math.cos(ang+0.4), y-a*Math.sin(ang+0.4));
+    ctx.closePath();ctx.fill();
+  }
+
+  function scaleBar(s){
+    // choisit une distance "ronde" ~ 90px
+    const targetPx=90; const mPerPx=1/s;
+    const raw=targetPx*mPerPx;
+    const pow=Math.pow(10,Math.floor(Math.log10(raw)));
+    const nice=[1,2,5,10].map(n=>n*pow).reduce((a,b)=>Math.abs(b-raw)<Math.abs(a-raw)?b:a);
+    const px=nice*s;
+    const x0=18,y0=H-20;
+    ctx.strokeStyle=getCSS('--muted');ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x0+px,y0);
+    ctx.moveTo(x0,y0-4);ctx.lineTo(x0,y0+4);ctx.moveTo(x0+px,y0-4);ctx.lineTo(x0+px,y0+4);ctx.stroke();
+    ctx.fillStyle=getCSS('--muted');ctx.font="11px "+getCSS('--mono');ctx.textAlign="center";
+    ctx.fillText(nice>=1000?(nice/1000)+" km":nice+" m", x0+px/2, y0-8);
+    ctx.textAlign="left";
+  }
+
+  function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+  // clic carte -> définit le point visé (met à jour distance + cap)
+  cv.addEventListener("click", e=>{
+    const rect=cv.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(W/rect.width);
+    const my=(e.clientY-rect.top)*(H/rect.height);
+    const E=(mx-cx)/M.scale, N=(cy-my)/M.scale;
+    const D=Math.hypot(E,N);
+    const b=((Math.atan2(E,N)/D2R)%360+360)%360;
+    els.tdist.value=Math.round(D);
+    els.tbear.value=Math.round(b);
+    compute();
+  });
+
+  $("reset").addEventListener("click",()=>{
+    els.tdist.value=500; els.tbear.value=90; compute();
+  });
+
+  // ---------- export KML ----------
+  $("kml").addEventListener("click",()=>{
+    const lat=+els.lat.value, lon=+els.lon.value;
+    const mLat=111320, mLon=111320*Math.cos(lat*D2R);
+    const toLL=(E,N)=>[lon+E/mLon, lat+N/mLat];   // KML = lon,lat
+
+    // frontière de l'empreinte (cercle décalé), 72 points
+    let ring="";
+    for(let i=0;i<=72;i++){
+      const a=i/72*2*Math.PI;
+      const E=M.Cx+M.R0*Math.cos(a), N=M.Cy+M.R0*Math.sin(a);
+      const [lo,la]=toLL(E,N); ring+=lo.toFixed(6)+","+la.toFixed(6)+",0 ";
+    }
+    // point max sous le vent
+    const dE=M.uE*M.R0*(1+M.k), dN=M.uN*M.R0*(1+M.k);
+    const [dlo,dla]=toLL(dE,dN);
+
+    const kml=
+`<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+<name>Plane ${Math.round(M.dh)}m - finesse ${M.g} - vent ${els.wind.value}kt</name>
+<Style id="cone"><LineStyle><color>ff3da2f2</color><width>2</width></LineStyle>
+<PolyStyle><color>553da2f2</color></PolyStyle></Style>
+<Placemark><name>Depart (${Math.round(M.alt)} m)</name>
+<Point><coordinates>${lon.toFixed(6)},${lat.toFixed(6)},0</coordinates></Point></Placemark>
+<Placemark><name>Max sous le vent (~${(M.R0*(1+M.k)/1000).toFixed(1)} km)</name>
+<Point><coordinates>${dlo.toFixed(6)},${dla.toFixed(6)},0</coordinates></Point></Placemark>
+<Placemark><name>Empreinte atteignable</name><styleUrl>#cone</styleUrl>
+<Polygon><outerBoundaryIs><LinearRing>
+<coordinates>${ring.trim()}</coordinates>
+</LinearRing></outerBoundaryIs></Polygon></Placemark>
+</Document></kml>`;
+
+    const blob=new Blob([kml],{type:"application/vnd.google-earth.kml+xml"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download="plane_tarifa.kml"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+  });
+
+  ids.forEach(i=>els[i].addEventListener("input",compute));
+  compute();
+})();
+</script>
+</body>
+</html>

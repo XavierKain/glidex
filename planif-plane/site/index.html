@@ -30,6 +30,9 @@
   .topbar .tag{font-size:11px;color:var(--signal-ink);border:1px solid #f0d9b8;background:#fdf6ec;
     border-radius:100px;padding:2px 10px;letter-spacing:.4px}
   .topbar .hint{font-size:12px;color:var(--muted);margin-left:auto}
+  .langbtn{border:1px solid var(--edge-strong);background:#fff;color:var(--ink);
+    font-size:11.5px;font-weight:700;border-radius:8px;padding:4px 10px;cursor:pointer}
+  .langbtn:hover{border-color:var(--signal)}
 
   .main{display:flex;flex:1;min-height:0}
   .side{width:372px;overflow-y:auto;padding:12px;flex-shrink:0;background:var(--bg)}
@@ -142,98 +145,94 @@
 <div class="app">
   <div class="topbar">
     <div class="logo"><div class="mark">G</div><h1>GlideX</h1></div>
-    <span class="tag">plané · dérive vent · relief</span>
-    <span class="hint">Clic sur la carte = ajouter un point (départ puis étapes). Suppression : clic droit sur un marqueur, ou via la liste des points.</span>
+    <span class="tag" data-i18n="tag"></span>
+    <span class="hint" data-i18n="hint"></span>
+    <button class="langbtn" id="langBtn" title="Français / English">FR</button>
   </div>
 
   <div class="main">
     <div class="side">
 
       <section class="card">
-        <div class="card-head"><span class="num">1</span><h2>Ta voile</h2></div>
+        <div class="card-head"><span class="num">1</span><h2 data-i18n="wing_h"></h2></div>
         <div class="row2">
-          <div class="field"><label>Modèle</label><select id="wing"></select></div>
-          <div class="field"><label>Taille <span class="unit">m²</span></label><select id="size"></select></div>
+          <div class="field"><label><span data-i18n="model"></span></label><select id="wing"></select></div>
+          <div class="field"><label><span data-i18n="size"></span> <span class="unit">m²</span></label><select id="size"></select></div>
         </div>
         <div class="row3">
-          <div class="field"><label>Fin. best <span class="unit">L/D</span></label><input type="number" id="glide" step="0.1" min="1"></div>
-          <div class="field"><label>Fin. planif <span class="unit">L/D</span></label><input type="number" id="glideMin" step="0.1" min="1"></div>
-          <div class="field"><label>Vitesse <span class="unit">km/h</span></label><input type="number" id="vspeed" step="1" min="10"></div>
+          <div class="field"><label><span data-i18n="f_best"></span> <span class="unit">L/D</span></label><input type="number" id="glide" step="0.1" min="1"></div>
+          <div class="field"><label><span data-i18n="f_plan"></span> <span class="unit">L/D</span></label><input type="number" id="glideMin" step="0.1" min="1"></div>
+          <div class="field"><label><span data-i18n="speed"></span> <span class="unit">km/h</span></label><input type="number" id="vspeed" step="1" min="10"></div>
         </div>
         <details>
-          <summary>Aide · calibrer avec un vol réel</summary>
+          <summary data-i18n="help_sum"></summary>
           <p class="est" id="wingEst"></p>
-          <p class="est"><b>Fin. best</b> = ta meilleure finesse. <b>Fin. planif</b> = finesse prudente si tu n'es pas au best glide — c'est elle qui donne la garantie basse. Entre les deux : ta fourchette.</p>
-          <p class="est">Calibration par vent quasi nul : distance parcourue ÷ hauteur perdue = ta vraie finesse.</p>
+          <p class="est" data-i18n="help1"></p>
+          <p class="est" data-i18n="help2"></p>
           <div class="row2">
-            <div class="field"><label>Distance <span class="unit">m</span></label><input type="number" id="calD" placeholder="ex. 900"></div>
-            <div class="field"><label>H. perdue <span class="unit">m</span></label><input type="number" id="calH" placeholder="ex. 120"></div>
+            <div class="field"><label><span data-i18n="cal_d"></span> <span class="unit">m</span></label><input type="number" id="calD" data-i18n-ph="ph_ex"></div>
+            <div class="field"><label><span data-i18n="cal_h"></span> <span class="unit">m</span></label><input type="number" id="calH" data-i18n-ph="ph_ex2"></div>
           </div>
-          <div class="field"><label>Vitesse GPS best glide <span class="unit">km/h</span></label><input type="number" id="calV" placeholder="optionnel"></div>
-          <button id="calBtn">Appliquer à la finesse best</button>
+          <div class="field"><label><span data-i18n="cal_v"></span> <span class="unit">km/h</span></label><input type="number" id="calV" data-i18n-ph="ph_opt"></div>
+          <button id="calBtn" data-i18n="cal_btn"></button>
         </details>
       </section>
 
       <section class="card">
-        <div class="card-head"><span class="num">2</span><h2>Le vent</h2><span class="sub mono" id="roseTxt">—</span></div>
+        <div class="card-head"><span class="num">2</span><h2 data-i18n="wind_h"></h2><span class="sub mono" id="roseTxt">—</span></div>
         <div class="wind-grid">
           <svg id="rose" width="82" height="82" viewBox="0 0 82 82"></svg>
-          <div class="field" style="margin:0"><label>Force <span class="unit">kt</span></label>
+          <div class="field" style="margin:0"><label><span data-i18n="force"></span> <span class="unit">kt</span></label>
             <input type="number" id="wind" value="10" step="1" min="0"></div>
-          <div class="field" style="margin:0"><label>De <span class="unit">° vrai</span></label>
+          <div class="field" style="margin:0"><label><span data-i18n="from"></span> <span class="unit" data-i18n="true_deg"></span></label>
             <input type="number" id="wdir" value="270" step="5"></div>
         </div>
-        <p class="warn" id="windWarn" style="display:none">⚠ Vent ≥ vitesse air : pénétration face au vent impossible. Les résultats face au vent ne sont pas fiables.</p>
+        <p class="warn" id="windWarn" style="display:none" data-i18n="windwarn"></p>
       </section>
 
       <section class="card">
-        <div class="card-head"><span class="num">3</span><h2>Altitudes &amp; marge</h2></div>
+        <div class="card-head"><span class="num">3</span><h2 data-i18n="alt_h"></h2></div>
         <div class="row3">
-          <div class="field"><label>Départ <span class="unit">m</span></label><input type="number" id="alt" value="700" step="10"></div>
-          <div class="field"><label>Sol arr. <span class="unit">m</span></label><input type="number" id="ground" value="0" step="10"></div>
-          <div class="field"><label>Marge <span class="unit">m</span></label><input type="number" id="margin" value="30" step="5"></div>
+          <div class="field"><label><span data-i18n="start_alt"></span> <span class="unit">m</span></label><input type="number" id="alt" value="700" step="10"></div>
+          <div class="field"><label><span data-i18n="gnd"></span> <span class="unit">m</span></label><input type="number" id="ground" value="0" step="10"></div>
+          <div class="field"><label><span data-i18n="margin"></span> <span class="unit">m</span></label><input type="number" id="margin" value="30" step="5"></div>
         </div>
-        <div class="chk"><input type="checkbox" id="autoElev" checked><label for="autoElev" style="margin:0;font-weight:400">Altitude sol auto (relief) à l'arrivée</label></div>
+        <div class="chk"><input type="checkbox" id="autoElev" checked><label for="autoElev" style="margin:0;font-weight:400" data-i18n="autoelev"></label></div>
       </section>
 
       <section class="card results">
-        <div class="card-head"><span class="num">4</span><h2>Résultat de la route</h2><span class="sub" id="legCount"></span></div>
+        <div class="card-head"><span class="num">4</span><h2 data-i18n="res_h"></h2><span class="sub" id="legCount"></span></div>
         <div class="readout">
-          <div class="cell arr" id="cArr"><div class="k">Hauteur au sol à l'arrivée</div><div class="v" id="vArr">—</div><div class="verdict" id="vVerdict"></div><div class="relief" id="vRelief"></div></div>
-          <div class="cell"><div class="k">Distance</div><div class="v" id="vDist">—</div></div>
-          <div class="cell"><div class="k">Cap départ</div><div class="v" id="vBear">—</div></div>
-          <div class="cell"><div class="k">Temps de vol</div><div class="v" id="vTime">—</div></div>
-          <div class="cell"><div class="k">Vitesse sol moy.</div><div class="v" id="vGs">—</div></div>
-          <div class="cell"><div class="k">Δ alt. perdue</div><div class="v" id="vDrop">—</div></div>
-          <div class="cell wind"><div class="k">Compo. vent</div><div class="v" id="vWc">—</div></div>
+          <div class="cell arr" id="cArr"><div class="k" data-i18n="k_arr"></div><div class="v" id="vArr">—</div><div class="verdict" id="vVerdict"></div><div class="relief" id="vRelief"></div></div>
+          <div class="cell"><div class="k" data-i18n="k_dist"></div><div class="v" id="vDist">—</div></div>
+          <div class="cell"><div class="k" data-i18n="k_bear"></div><div class="v" id="vBear">—</div></div>
+          <div class="cell"><div class="k" data-i18n="k_time"></div><div class="v" id="vTime">—</div></div>
+          <div class="cell"><div class="k" data-i18n="k_gs"></div><div class="v" id="vGs">—</div></div>
+          <div class="cell"><div class="k" data-i18n="k_drop"></div><div class="v" id="vDrop">—</div></div>
+          <div class="cell wind"><div class="k" data-i18n="k_wc"></div><div class="v" id="vWc">—</div></div>
         </div>
         <div class="ptlist" id="ptList" style="display:none"></div>
         <div class="legs" id="legList" style="display:none"></div>
         <div class="btns">
-          <button class="primary" id="share">Partager le lien</button>
+          <button class="primary" id="share" data-i18n="share_btn"></button>
           <button id="kml">KML</button>
-          <button id="reset">Réinitialiser</button>
+          <button id="reset" data-i18n="reset"></button>
         </div>
       </section>
 
       <details class="footnote">
-        <summary>Limites du modèle &amp; sources</summary>
-        <p class="est">
-          Finesses par défaut = <b>estimations</b> (Flare ne publie pas de polaire chiffrée) — calibre-les.
-          Sur la carte : zone pleine = atteignable en finesse de planif (sûr) ; contour pointillé = max au best glide.
-          Le relief sous la route est échantillonné (~profil en bas de carte) mais le vent est supposé uniforme et constant.
-          Réglages et route mémorisés dans ton navigateur. Fonds © OpenStreetMap · Esri. Élévation © open-meteo.
-        </p>
+        <summary data-i18n="foot_sum"></summary>
+        <p class="est" data-i18n="foot"></p>
       </details>
     </div>
 
     <div id="map">
-      <div class="maptip" id="tip">Clique pour poser le point de départ</div>
+      <div class="maptip" id="tip" data-i18n="tip_start"></div>
       <div id="profWrap">
-        <div class="prof-head"><span class="t">Profil de terrain</span><span id="profStatus"></span><button id="profClose" title="Fermer">×</button></div>
+        <div class="prof-head"><span class="t" data-i18n="prof_t"></span><span id="profStatus"></span><button id="profClose" title="×">×</button></div>
         <canvas id="prof"></canvas>
       </div>
-      <button id="profToggle">⛰ Profil</button>
+      <button id="profToggle" data-i18n="prof_btn"></button>
     </div>
   </div>
 </div>
@@ -246,18 +245,121 @@
   const LS_KEY="glidex_state_v1";
   const INIT_HASH=location.hash; // avant toute écriture par updateShareUrl
 
+  /* ---------- i18n (anglais par défaut) ---------- */
+  const I18N={
+    en:{
+      title:"GlideX — Glide Planner",
+      tag:"glide · wind drift · terrain",
+      hint:"Click the map to add a point (start, then legs). Remove: right-click a marker or use the points list.",
+      wing_h:"Your wing", model:"Model", size:"Size", f_best:"Best L/D", f_plan:"Plan L/D", speed:"Speed",
+      help_sum:"Help · calibrate with a real flight",
+      help1:"<b>Best L/D</b> = your best glide ratio. <b>Plan L/D</b> = conservative ratio when you're not at best glide — it gives the guaranteed minimum. Between the two: your range.",
+      help2:"Calibrate in near-zero wind: distance flown ÷ height lost = your real glide ratio.",
+      cal_d:"Distance", cal_h:"Height lost", cal_v:"Best-glide GPS speed", cal_btn:"Apply to best L/D",
+      ph_ex:"e.g. 900", ph_ex2:"e.g. 120", ph_opt:"optional",
+      wind_h:"Wind", force:"Speed", from:"From", true_deg:"° true",
+      windwarn:"⚠ Wind ≥ airspeed: upwind penetration is impossible. Upwind results are not reliable.",
+      alt_h:"Altitudes & margin", start_alt:"Start", gnd:"Gnd dest.", margin:"Margin",
+      autoelev:"Auto ground elevation at destination",
+      res_h:"Route result", k_arr:"Height above ground at arrival", k_dist:"Distance",
+      k_bear:"Initial heading", k_time:"Flight time", k_gs:"Avg ground speed",
+      k_drop:"Δ altitude lost", k_wc:"Wind component",
+      share_btn:"Share link", reset:"Reset",
+      foot_sum:"Model limits & sources",
+      foot:"Default glide ratios = <b>estimates</b> (Flare publishes no polar) — calibrate them. On the map: filled area = reachable at plan L/D (safe); dashed outline = max at best glide. Terrain under the route is sampled (profile at the bottom of the map) but wind is assumed uniform and constant. Settings and route are saved in your browser. Basemaps © OpenStreetMap · Esri. Elevation © open-meteo.",
+      prof_t:"Terrain profile", prof_btn:"⛰ Profile",
+      tip_start:"Click to set the start point",
+      tip_end:"Click to set the destination (then more legs if you want)",
+      blows:"→ blows toward",
+      msol:"m AGL",
+      v_ok:"✓ Margin OK (≥ {0} m guaranteed even off best glide)",
+      v_bg:"⚠ Needs best glide: guaranteed {0} m &lt; margin {1} m",
+      v_short:"Ground reached first — {0} to {1} m short",
+      v_out:"✕ Out of reach at plan L/D",
+      st_cut:"✕ terrain hit at {0}", vr_cut:"⛰ ✕ Track hits terrain at {0}",
+      st_low:"⚠ low pass: +{0} m at {1}", vr_low:"⛰ ⚠ Terrain close: +{0} m at {1}",
+      st_clear:"✓ clear · min +{0} m",
+      left_t:"{0}–{1} m left", start:"Start", end:"End",
+      copied:"Link copied ✓", copy_prompt:"Copy this link:",
+      kml_alert:"Set a start point first.", elev_unavail:"elevation unavailable",
+      cal_done:"Glide ratio measured in flight.",
+      wn_est:"Best-glide estimate — Flare publishes no polar. Calibrate it.",
+      wn_m16:"Size 16 tuned from your GPS flights (v≈50 km/h, ~6.5 realistic / ~8 best L/D). Other sizes estimated.",
+      wn_m18:"Size 18: L/D tuned from your GPS flights (~6.5). Other sizes estimated.",
+      wn_enb:"Ballpark for an EN-B paraglider.",
+      wn_free:"Free / measured values."
+    },
+    fr:{
+      title:"GlideX — Planif Plané",
+      tag:"plané · dérive vent · relief",
+      hint:"Clic sur la carte = ajouter un point (départ puis étapes). Suppression : clic droit sur un marqueur, ou via la liste des points.",
+      wing_h:"Ta voile", model:"Modèle", size:"Taille", f_best:"Fin. best", f_plan:"Fin. planif", speed:"Vitesse",
+      help_sum:"Aide · calibrer avec un vol réel",
+      help1:"<b>Fin. best</b> = ta meilleure finesse. <b>Fin. planif</b> = finesse prudente si tu n'es pas au best glide — c'est elle qui donne la garantie basse. Entre les deux : ta fourchette.",
+      help2:"Calibration par vent quasi nul : distance parcourue ÷ hauteur perdue = ta vraie finesse.",
+      cal_d:"Distance", cal_h:"H. perdue", cal_v:"Vitesse GPS best glide", cal_btn:"Appliquer à la finesse best",
+      ph_ex:"ex. 900", ph_ex2:"ex. 120", ph_opt:"optionnel",
+      wind_h:"Le vent", force:"Force", from:"De", true_deg:"° vrai",
+      windwarn:"⚠ Vent ≥ vitesse air : pénétration face au vent impossible. Les résultats face au vent ne sont pas fiables.",
+      alt_h:"Altitudes & marge", start_alt:"Départ", gnd:"Sol arr.", margin:"Marge",
+      autoelev:"Altitude sol auto (relief) à l'arrivée",
+      res_h:"Résultat de la route", k_arr:"Hauteur au sol à l'arrivée", k_dist:"Distance",
+      k_bear:"Cap départ", k_time:"Temps de vol", k_gs:"Vitesse sol moy.",
+      k_drop:"Δ alt. perdue", k_wc:"Compo. vent",
+      share_btn:"Partager le lien", reset:"Réinitialiser",
+      foot_sum:"Limites du modèle & sources",
+      foot:"Finesses par défaut = <b>estimations</b> (Flare ne publie pas de polaire chiffrée) — calibre-les. Sur la carte : zone pleine = atteignable en finesse de planif (sûr) ; contour pointillé = max au best glide. Le relief sous la route est échantillonné (profil en bas de carte) mais le vent est supposé uniforme et constant. Réglages et route mémorisés dans ton navigateur. Fonds © OpenStreetMap · Esri. Élévation © open-meteo.",
+      prof_t:"Profil de terrain", prof_btn:"⛰ Profil",
+      tip_start:"Clique pour poser le point de départ",
+      tip_end:"Clique pour poser l'arrivée (puis d'autres étapes si tu veux)",
+      blows:"→ pousse vers",
+      msol:"m sol",
+      v_ok:"✓ Marge OK (≥ {0} m garantis même hors best glide)",
+      v_bg:"⚠ Passe en best glide : garanti {0} m &lt; marge {1} m",
+      v_short:"Sol atteint avant — {0} à {1} m manquants",
+      v_out:"✕ Hors de portée en finesse de planif",
+      st_cut:"✕ relief coupé à {0}", vr_cut:"⛰ ✕ La trajectoire coupe le relief à {0}",
+      st_low:"⚠ passage bas : +{0} m à {1}", vr_low:"⛰ ⚠ Relief frôlé : +{0} m à {1}",
+      st_clear:"✓ dégagé · mini +{0} m",
+      left_t:"reste {0}–{1} m", start:"Départ", end:"Arrivée",
+      copied:"Lien copié ✓", copy_prompt:"Copie ce lien :",
+      kml_alert:"Pose d'abord un point de départ.", elev_unavail:"élévation indisponible",
+      cal_done:"Finesse mesurée en vol.",
+      wn_est:"Estimation best-glide — Flare ne publie pas de polaire. À calibrer.",
+      wn_m16:"Taille 16 recalée sur tes vols GPS (v≈50 km/h, finesse ~6.5 réaliste / ~8 best). Autres tailles estimées.",
+      wn_m18:"Taille 18 : finesse recalée sur tes vols GPS (~6.5). Autres tailles estimées.",
+      wn_enb:"Ordre de grandeur d'un parapente EN-B.",
+      wn_free:"Valeurs libres / mesurées."
+    }
+  };
+  let lang=(localStorage.getItem("glidex_lang")||"en") in I18N ? (localStorage.getItem("glidex_lang")||"en") : "en";
+  function T(k){
+    let s=(I18N[lang][k]!==undefined?I18N[lang][k]:I18N.en[k]); if(s===undefined)return k;
+    for(let i=1;i<arguments.length;i++)s=s.split("{"+(i-1)+"}").join(arguments[i]);
+    return s;
+  }
+  function applyLang(){
+    document.documentElement.lang=lang;
+    document.title=T("title");
+    document.querySelectorAll("[data-i18n]").forEach(el=>{el.innerHTML=T(el.dataset.i18n);});
+    document.querySelectorAll("[data-i18n-ph]").forEach(el=>{el.placeholder=T(el.dataset.i18nPh);});
+    $("langBtn").textContent = lang==="en" ? "FR" : "EN";
+    const wk=$("wing")&&$("wing").value;
+    if(wk&&WINGS[wk])$("wingEst").textContent=T("wn_"+WINGS[wk].note);
+  }
+
   /* ---------- base de voiles ----------
      Tailles = officielles Flare (go-flare.com).
      f (finesse) & v (vit. best glide) = ESTIMATIONS (aucune polaire publiée). */
   const WINGS={
-    flare_bandit:{name:"Flare Bandit",note:"mesuré16",sizes:{
+    flare_bandit:{name:"Flare Bandit",note:"m16",sizes:{
       10:{f:7.0,v:46},13:{f:7.5,v:45},16:{f:8.0,v:50},19:{f:8.3,v:43},22:{f:8.5,v:42}}},
     flare_moustache2:{name:"Flare Moustache 2",note:"est",sizes:{
       13:{f:6.5,v:45},15:{f:6.8,v:44},18:{f:7.2,v:43},22:{f:7.6,v:41},26:{f:7.9,v:39}}},
-    flare_moustache:{name:"Flare Moustache 1",note:"mesuré18",sizes:{
+    flare_moustache:{name:"Flare Moustache 1",note:"m18",sizes:{
       15:{f:6.4,v:44},18:{f:6.5,v:43},20:{f:7.0,v:42},22:{f:7.2,v:41}}},
-    paraglider_b:{name:"Parapente EN-B (générique)",note:"ordre de grandeur",sizes:{"—":{f:9.0,v:38}}},
-    custom:{name:"Custom / mesuré",note:"libre",sizes:{"—":{f:8.0,v:44}}}
+    paraglider_b:{name:"Paraglider EN-B",note:"enb",sizes:{"—":{f:9.0,v:38}}},
+    custom:{name:"Custom",note:"free",sizes:{"—":{f:8.0,v:44}}}
   };
 
   function fillWings(){
@@ -274,12 +376,7 @@
   function applyWing(){
     const wk=$("wing").value, d=WINGS[wk].sizes[$("size").value];
     if(d){ $("glide").value=d.f; $("glideMin").value=(d.f*0.8).toFixed(1); $("vspeed").value=d.v; }
-    const map={est:"Estimation best-glide — Flare ne publie pas de polaire. À calibrer.",
-      "mesuré16":"Taille 16 recalée sur tes vols GPS (v≈50 km/h, finesse ~6.5 réaliste / ~8 best). Autres tailles estimées.",
-      "mesuré18":"Taille 18 : finesse recalée sur tes vols GPS (~6.5). Autres tailles estimées.",
-      "ordre de grandeur":"Ordre de grandeur d'un parapente EN-B.",
-      libre:"Valeurs libres / mesurées."};
-    $("wingEst").textContent=map[WINGS[wk].note]||"";
+    $("wingEst").textContent=T("wn_"+WINGS[wk].note);
     recompute();
   }
 
@@ -306,7 +403,7 @@
     mk.on("contextmenu",ev=>{if(ev.originalEvent)ev.originalEvent.preventDefault();removePoint(markers.indexOf(mk));});
     markers.push(mk); refreshIcons();
     if(!silent){
-      if(pts.length===1)tip("Clique pour poser l'arrivée (puis d'autres étapes si tu veux)");
+      if(pts.length===1)tip(T("tip_end"));
       else{tip("");fetchGround();}
       recompute(); saveState();
     }
@@ -326,7 +423,7 @@
     el.style.display="block";
     el.innerHTML=pts.map((q,i)=>{
       const col=i===0?getCSS('--ok'):(i===pts.length-1?getCSS('--danger'):getCSS('--signal'));
-      const lbl=i===0?"Départ":(i===pts.length-1?"Arrivée":"P"+i);
+      const lbl=i===0?T("start"):(i===pts.length-1?T("end"):"P"+i);
       return `<div class="pt" data-i="${i}"><span class="dot" style="background:${col}"></span>`+
         `<span class="lbl">${lbl}</span><span class="co">${q.lat.toFixed(4)}, ${q.lng.toFixed(4)}</span>`+
         `<button class="ptdel" data-del="${i}" title="Supprimer ce point">✕</button></div>`;
@@ -418,14 +515,14 @@
 
     const c=$("cArr");c.className="cell arr "+(reach?"good":"bad");
     if(reach){
-      $("vArr").innerHTML=Math.round(aglCons)+'–'+Math.round(aglBest)+' <small>m sol</small>';
+      $("vArr").innerHTML=Math.round(aglCons)+'–'+Math.round(aglBest)+' <small>'+T("msol")+'</small>';
       $("vVerdict").innerHTML = safe
-        ? '✓ Marge OK (≥ '+p.mrg+' m garantis même hors best glide)'
-        : '⚠ Passe en best glide : garanti '+Math.round(aglCons)+' m &lt; marge '+p.mrg+' m';
+        ? T("v_ok",p.mrg)
+        : T("v_bg",Math.round(aglCons),p.mrg);
       $("vVerdict").style.color = safe?getCSS('--ok'):getCSS('--signal');
     } else {
-      $("vArr").innerHTML='Sol atteint avant — '+Math.round(-aglCons)+' à '+Math.round(-aglBest)+' m manquants';
-      $("vVerdict").innerHTML='✕ Hors de portée en finesse de planif';
+      $("vArr").innerHTML=T("v_short",Math.round(-aglCons),Math.round(-aglBest));
+      $("vVerdict").innerHTML=T("v_out");
       $("vVerdict").style.color=getCSS('--danger');
     }
     $("vDist").innerHTML=fmtD(R.totD).replace(" ",' <small>')+'</small>';
@@ -441,7 +538,7 @@
       ll.style.display="";
       ll.innerHTML=R.legs.map((lg,i)=>{
         const hC=Math.round((p.alt-p.grd)-lg.cumC),hB=Math.round((p.alt-p.grd)-lg.cumB);
-        return `<div><span><b>L${i+1}</b> ${fmtD(lg.D)} · ${Math.round(lg.bear)}°</span><span>reste ${hC}–${hB} m</span></div>`;
+        return `<div><span><b>L${i+1}</b> ${fmtD(lg.D)} · ${Math.round(lg.bear)}°</span><span>${T("left_t",hC,hB)}</span></div>`;
       }).join("");
     } else ll.style.display="none";
 
@@ -489,7 +586,7 @@
         terr={sig,d:ds,z:j.elevation,tot,Dl};
         renderProfile();
       })
-      .catch(()=>{terrPending=null;$("profStatus").textContent="élévation indisponible";});
+      .catch(()=>{terrPending=null;$("profStatus").textContent=T("elev_unavail");});
   }
   function pilotAlt(d,p,legs,Dl,useCons){
     let acc=0,i=0;
@@ -518,13 +615,13 @@
     });
     const st=$("profStatus"),vr=$("vRelief");
     if(crossAt>=0){
-      st.textContent="✕ relief coupé à "+fmtD(crossAt);st.style.color=getCSS('--danger');
-      vr.textContent="⛰ ✕ La trajectoire coupe le relief à "+fmtD(crossAt);vr.style.color=getCSS('--danger');
+      st.textContent=T("st_cut",fmtD(crossAt));st.style.color=getCSS('--danger');
+      vr.textContent=T("vr_cut",fmtD(crossAt));vr.style.color=getCSS('--danger');
     }else if(minClear<p.mrg){
-      st.textContent="⚠ passage bas : +"+Math.round(minClear)+" m à "+fmtD(minAt);st.style.color=getCSS('--signal');
-      vr.textContent="⛰ ⚠ Relief frôlé : +"+Math.round(minClear)+" m à "+fmtD(minAt);vr.style.color=getCSS('--signal');
+      st.textContent=T("st_low",Math.round(minClear),fmtD(minAt));st.style.color=getCSS('--signal');
+      vr.textContent=T("vr_low",Math.round(minClear),fmtD(minAt));vr.style.color=getCSS('--signal');
     }else{
-      st.textContent="✓ dégagé · mini +"+Math.round(minClear)+" m";st.style.color=getCSS('--ok');
+      st.textContent=T("st_clear",Math.round(minClear));st.style.color=getCSS('--ok');
       vr.textContent="";
     }
 
@@ -585,7 +682,7 @@
       <text x="41" y="5" fill="var(--muted)" font-size="8" text-anchor="middle">N</text>
       <line x1="41" y1="41" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}" stroke="var(--wind-ink)" stroke-width="2.5"/>
       <circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="3" fill="var(--wind-ink)"/><circle cx="41" cy="41" r="2.5" fill="var(--ink)"/>`;
-    $("roseTxt").innerHTML=fromDeg+'° <small>→ pousse vers '+Math.round(toward)+'°</small>';
+    $("roseTxt").innerHTML=fromDeg+'° <small>'+T("blows")+' '+Math.round(toward)+'°</small>';
   }
   (function roseDrag(){
     const r=$("rose");let on=false;
@@ -614,12 +711,12 @@
   function stateObj(){
     return{w:$("wing").value,s:$("size").value,f:$("glide").value,fm:$("glideMin").value,vs:$("vspeed").value,
       wd:$("wdir").value,ws:$("wind").value,a:$("alt").value,g:$("ground").value,m:$("margin").value,
-      ae:$("autoElev").checked?1:0,p:pts.map(q=>[+q.lat.toFixed(5),+q.lng.toFixed(5)])};
+      ae:$("autoElev").checked?1:0,l:lang,p:pts.map(q=>[+q.lat.toFixed(5),+q.lng.toFixed(5)])};
   }
   function updateShareUrl(){
     const o=stateObj(),q=new URLSearchParams();
     q.set("w",o.w);q.set("s",o.s);q.set("f",o.f);q.set("fm",o.fm);q.set("vs",o.vs);
-    q.set("wd",o.wd);q.set("ws",o.ws);q.set("a",o.a);q.set("g",o.g);q.set("m",o.m);q.set("ae",o.ae);
+    q.set("wd",o.wd);q.set("ws",o.ws);q.set("a",o.a);q.set("g",o.g);q.set("m",o.m);q.set("ae",o.ae);q.set("l",o.l);
     if(o.p.length)q.set("p",o.p.map(x=>x[0]+"~"+x[1]).join("_"));
     const c=map.getCenter();
     q.set("c",c.lat.toFixed(5)+"~"+c.lng.toFixed(5));q.set("z",map.getZoom());
@@ -638,7 +735,7 @@
     const h=new URLSearchParams(INIT_HASH.slice(1));
     if(h.has("p")||h.has("f")){
       const o={w:h.get("w"),s:h.get("s"),f:h.get("f"),fm:h.get("fm"),vs:h.get("vs"),wd:h.get("wd"),ws:h.get("ws"),
-        a:h.get("a"),g:h.get("g"),m:h.get("m"),ae:h.get("ae"),p:[]};
+        a:h.get("a"),g:h.get("g"),m:h.get("m"),ae:h.get("ae"),l:h.get("l"),p:[]};
       if(h.get("p"))o.p=h.get("p").split("_").map(s=>s.split("~").map(Number)).filter(x=>x.length===2&&isFinite(x[0])&&isFinite(x[1]));
       if(h.get("c")){const cc=h.get("c").split("~").map(Number);if(cc.length===2&&isFinite(cc[0])&&isFinite(cc[1]))o.c=cc;}
       if(h.get("z")&&isFinite(+h.get("z")))o.z=+h.get("z");
@@ -668,9 +765,14 @@
   }
   $("share").addEventListener("click",()=>{
     updateShareUrl();
-    const done=()=>{const b=$("share"),t=b.textContent;b.textContent="Lien copié ✓";setTimeout(()=>b.textContent=t,1600);};
-    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(location.href).then(done).catch(()=>prompt("Copie ce lien :",location.href));
-    else prompt("Copie ce lien :",location.href);
+    const done=()=>{const b=$("share");b.textContent=T("copied");setTimeout(()=>b.textContent=T("share_btn"),1600);};
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(location.href).then(done).catch(()=>prompt(T("copy_prompt"),location.href));
+    else prompt(T("copy_prompt"),location.href);
+  });
+  $("langBtn").addEventListener("click",()=>{
+    lang = lang==="en" ? "fr" : "en";
+    try{localStorage.setItem("glidex_lang",lang);}catch(e){}
+    applyLang(); recompute(); saveState();
   });
 
   /* ---------- calibration ---------- */
@@ -678,14 +780,14 @@
     const D=+$("calD").value,H=+$("calH").value,V=+$("calV").value;
     if(D>0&&H>0){const f=D/H;$("glide").value=f.toFixed(1);$("glideMin").value=(f*0.8).toFixed(1);
       $("wing").value="custom";const s=$("size");s.innerHTML="";const o=document.createElement("option");o.value="—";o.textContent="—";s.appendChild(o);
-      $("wingEst").textContent="Finesse mesurée en vol.";}
+      $("wingEst").textContent=T("cal_done");}
     if(V>0)$("vspeed").value=Math.round(V);
     recompute();saveState();
   });
 
   /* ---------- KML ---------- */
   $("kml").addEventListener("click",()=>{
-    if(!pts.length){alert("Pose d'abord un point de départ.");return;}
+    if(!pts.length){alert(T("kml_alert"));return;}
     const p=readParams(),R0=p.gMin*p.dh,Cx=R0*p.k*p.uE,Cy=R0*p.k*p.uN;
     let ring="";for(let i=0;i<=72;i++){const a=i/72*2*Math.PI;const ll=offset(pts[0],Cx+R0*Math.cos(a),Cy+R0*Math.sin(a));ring+=ll[1].toFixed(6)+","+ll[0].toFixed(6)+",0 ";}
     const dwn=offset(pts[0],p.uE*R0*(1+p.k),p.uN*R0*(1+p.k));
@@ -708,7 +810,7 @@ ${route}
     markers.forEach(m=>map.removeLayer(m));
     [footBest,footCons,routeLine,windLine].forEach(l=>l&&map.removeLayer(l));
     pts=[];markers=[];footBest=footCons=routeLine=windLine=null;terr=null;blank();
-    $("tip").style.display="";$("tip").style.opacity=1;$("tip").textContent="Clique pour poser le point de départ";
+    $("tip").style.display="";$("tip").style.opacity=1;$("tip").textContent=T("tip_start");
     recompute();saveState();
   });
 
@@ -722,6 +824,8 @@ ${route}
   /* ---------- init ---------- */
   fillWings();
   const st=loadState();
+  if(st&&st.l&&I18N[st.l])lang=st.l;
+  applyLang();
   if(st&&(st.p&&st.p.length||st.f)){
     applyState(st);
   }else{

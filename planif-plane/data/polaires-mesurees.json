@@ -1,0 +1,86 @@
+{
+  "Chili 5 26": {
+    "n_segments": 71,
+    "f_pooled": 8.23,
+    "f_median": 8.47,
+    "f_p80": 12.35,
+    "va_median_kmh": 26.9,
+    "va_bestf_kmh": 26.1,
+    "alt_perdue_totale_m": 1760,
+    "wind_median_kt": 4.9,
+    "source": "measured-gps",
+    "note": "Vz GPS (pas de baro) ; segments en soaring possiblement influencés par l ascendance"
+  },
+  "Moustache M1 2025 18": {
+    "n_segments": 52,
+    "f_pooled": 6.34,
+    "f_median": 6.54,
+    "f_p80": 12.05,
+    "va_median_kmh": 31.8,
+    "va_bestf_kmh": 36.2,
+    "alt_perdue_totale_m": 1087,
+    "wind_median_kt": 11.2,
+    "source": "measured-gps",
+    "note": "Vz GPS (pas de baro) ; segments en soaring possiblement influencés par l ascendance"
+  },
+  "Moustache M2 22": {
+    "n_segments": 10,
+    "f_pooled": 6.96,
+    "f_median": 6.25,
+    "f_p80": 9.16,
+    "va_median_kmh": 38.8,
+    "va_bestf_kmh": 42.5,
+    "alt_perdue_totale_m": 247,
+    "wind_median_kt": 6.5,
+    "source": "measured-gps",
+    "note": "Vz GPS (pas de baro) ; segments en soaring possiblement influencés par l ascendance"
+  },
+  "Moustache M2 (grey) 18": {
+    "n_segments": 7,
+    "f_pooled": 7.56,
+    "f_median": 8.44,
+    "f_p80": 11.46,
+    "va_median_kmh": 36.4,
+    "va_bestf_kmh": 36.1,
+    "alt_perdue_totale_m": 135,
+    "wind_median_kt": 9.6,
+    "source": "measured-gps",
+    "note": "Vz GPS (pas de baro) ; segments en soaring possiblement influencés par l ascendance"
+  },
+  "Moustache M2 (grey) 13": {
+    "n_segments": 5,
+    "f_pooled": 5.61,
+    "f_median": 4.25,
+    "f_p80": 8.85,
+    "va_median_kmh": 17.4,
+    "va_bestf_kmh": 27.3,
+    "alt_perdue_totale_m": 95,
+    "wind_median_kt": 2.7,
+    "source": "measured-gps",
+    "note": "Vz GPS (pas de baro) ; segments en soaring possiblement influencés par l ascendance"
+  },
+  "Bandit 19": {
+    "n_segments": 5,
+    "f_pooled": 8.52,
+    "f_median": 9.66,
+    "f_p80": 12.61,
+    "va_median_kmh": 38.7,
+    "va_bestf_kmh": 37.9,
+    "alt_perdue_totale_m": 84,
+    "wind_median_kt": 13.9,
+    "source": "measured-gps",
+    "note": "Vz GPS (pas de baro) ; segments en soaring possiblement influencés par l ascendance"
+  },
+  "Bandit 22": {
+    "n_segments": 3,
+    "f_pooled": 11.23,
+    "f_median": 12.49,
+    "f_p80": 12.58,
+    "va_median_kmh": 36.1,
+    "va_bestf_kmh": 36.1,
+    "alt_perdue_totale_m": 35,
+    "wind_median_kt": 8.9,
+    "source": "measured-gps",
+    "note": "Vz GPS (pas de baro) ; segments en soaring possiblement influencés par l ascendance"
+  }
+}

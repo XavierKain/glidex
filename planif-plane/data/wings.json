@@ -13,7 +13,8 @@
       "sizes": {
         "10": { "f": 7.0, "v": 46, "source": "estimate" },
         "13": { "f": 7.5, "v": 45, "source": "estimate" },
-        "16": { "f": 8.0, "v": 44, "source": "estimate" },
+        "16": { "f": 8.0, "v": 50, "source": "measured",
+                "comment": "v et f recalées sur 5 sessions corde + 2 vols soaring (GPS, 2026-04..06) : Va fit cercle 49-55 km/h ; finesse poolee 6.4 (planif), meilleur segment 8.5 (best)" },
         "19": { "f": 8.3, "v": 43, "source": "estimate" },
         "22": { "f": 8.5, "v": 42, "source": "estimate" }
       }
@@ -35,7 +36,8 @@
       "sizesToConfirm": true,
       "sizes": {
         "15": { "f": 6.4, "v": 44, "source": "estimate" },
-        "18": { "f": 6.8, "v": 43, "source": "estimate" },
+        "18": { "f": 6.5, "v": 43, "source": "measured",
+                "comment": "f poolee 6.3 / mediane 6.5 sur 52 segments GPS (M1 2025, soaring — ascendance possible donc f reelle <= mesure) ; v restee estimee" },
         "20": { "f": 7.0, "v": 42, "source": "estimate" },
         "22": { "f": 7.2, "v": 41, "source": "estimate" }
       }

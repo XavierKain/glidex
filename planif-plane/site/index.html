@@ -250,12 +250,12 @@
      Tailles = officielles Flare (go-flare.com).
      f (finesse) & v (vit. best glide) = ESTIMATIONS (aucune polaire publiée). */
   const WINGS={
-    flare_bandit:{name:"Flare Bandit",note:"est",sizes:{
-      10:{f:7.0,v:46},13:{f:7.5,v:45},16:{f:8.0,v:44},19:{f:8.3,v:43},22:{f:8.5,v:42}}},
+    flare_bandit:{name:"Flare Bandit",note:"mesuré16",sizes:{
+      10:{f:7.0,v:46},13:{f:7.5,v:45},16:{f:8.0,v:50},19:{f:8.3,v:43},22:{f:8.5,v:42}}},
     flare_moustache2:{name:"Flare Moustache 2",note:"est",sizes:{
       13:{f:6.5,v:45},15:{f:6.8,v:44},18:{f:7.2,v:43},22:{f:7.6,v:41},26:{f:7.9,v:39}}},
-    flare_moustache:{name:"Flare Moustache 1",note:"est·tailles à confirmer",sizes:{
-      15:{f:6.4,v:44},18:{f:6.8,v:43},20:{f:7.0,v:42},22:{f:7.2,v:41}}},
+    flare_moustache:{name:"Flare Moustache 1",note:"mesuré18",sizes:{
+      15:{f:6.4,v:44},18:{f:6.5,v:43},20:{f:7.0,v:42},22:{f:7.2,v:41}}},
     paraglider_b:{name:"Parapente EN-B (générique)",note:"ordre de grandeur",sizes:{"—":{f:9.0,v:38}}},
     custom:{name:"Custom / mesuré",note:"libre",sizes:{"—":{f:8.0,v:44}}}
   };
@@ -275,7 +275,8 @@
     const wk=$("wing").value, d=WINGS[wk].sizes[$("size").value];
     if(d){ $("glide").value=d.f; $("glideMin").value=(d.f*0.8).toFixed(1); $("vspeed").value=d.v; }
     const map={est:"Estimation best-glide — Flare ne publie pas de polaire. À calibrer.",
-      "est·tailles à confirmer":"Estimation ; tailles Moustache 1 à confirmer. À calibrer.",
+      "mesuré16":"Taille 16 recalée sur tes vols GPS (v≈50 km/h, finesse ~6.5 réaliste / ~8 best). Autres tailles estimées.",
+      "mesuré18":"Taille 18 : finesse recalée sur tes vols GPS (~6.5). Autres tailles estimées.",
       "ordre de grandeur":"Ordre de grandeur d'un parapente EN-B.",
       libre:"Valeurs libres / mesurées."};
     $("wingEst").textContent=map[WINGS[wk].note]||"";

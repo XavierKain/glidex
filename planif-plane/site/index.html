@@ -84,6 +84,17 @@
   .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin-top:2px}
   .chk input{width:auto;accent-color:var(--signal)}
 
+  /* approche & atterrissage */
+  .okmsg{font-size:12px;color:var(--ok-ink);background:#eef8f1;border:1px solid #cde8d6;
+    border-radius:8px;padding:7px 10px;margin:6px 0 0;line-height:1.45}
+  .gates{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px;line-height:1.9}
+  .gates div{display:flex;justify-content:space-between;gap:8px}
+  .gates b{color:var(--ink);font-weight:600;font-family:var(--sans);font-size:11.5px}
+  .gates .val{color:var(--wind-ink);white-space:nowrap}
+  .gate{background:rgba(16,27,23,.92);color:#e9efeb;font:10.5px/1.3 ui-monospace,Menlo,Consolas,monospace;
+    padding:2px 7px;border-radius:100px;border:1px solid #24382f;white-space:nowrap;
+    display:inline-block;transform:translate(-50%,-150%)}
+
   /* bloc résultat : instrument sombre */
   .card.results{background:var(--instrument);border-color:var(--instrument-edge)}
   .card.results .card-head h2{color:#e9efeb}
@@ -220,6 +231,23 @@
         </div>
       </section>
 
+      <section class="card">
+        <div class="card-head"><span class="num">5</span><h2 data-i18n="ap_h"></h2><span class="sub mono" id="apAxis">—</span></div>
+        <div class="chk" style="margin:0"><input type="checkbox" id="apOn"><label for="apOn" style="margin:0;font-weight:400" data-i18n="ap_on"></label></div>
+        <div id="apOut" style="display:none;margin-top:9px">
+          <div class="row3">
+            <div class="field"><label><span data-i18n="lz_r"></span> <span class="unit">m</span></label><input type="number" id="lzR" value="50" step="5" min="5"></div>
+            <div class="field"><label><span data-i18n="obs_h"></span> <span class="unit">m</span></label><input type="number" id="obsH" value="15" step="1" min="0"></div>
+            <div class="field"><label><span data-i18n="side"></span></label><select id="apSide"><option value="left" data-i18n="side_l"></option><option value="right" data-i18n="side_r"></option></select></div>
+          </div>
+          <div class="gates" id="apGates"></div>
+          <p id="apVerdict" style="display:none"></p>
+          <p class="warn" id="apEntry" style="display:none"></p>
+          <p class="est" id="apTerr" style="margin:6px 0 0"></p>
+          <details style="margin-top:8px"><summary data-i18n="ap_help_sum"></summary><p class="est" data-i18n="ap_help"></p></details>
+        </div>
+      </section>
+
       <details class="footnote">
         <summary data-i18n="foot_sum"></summary>
         <p class="est" data-i18n="foot"></p>
@@ -282,6 +310,23 @@
       left_t:"{0}–{1} m left", start:"Start", end:"End",
       copied:"Link copied ✓", copy_prompt:"Copy this link:",
       kml_alert:"Set a start point first.", elev_unavail:"elevation unavailable",
+      ap_h:"Landing approach", ap_on:"Show the landing circuit at the last point",
+      lz_r:"LZ radius", obs_h:"Obstacles", side:"Circuit", side_l:"Left-hand", side_r:"Right-hand",
+      ap_final:"final",
+      g_dw:"Downwind entry", g_base:"Base turn", g_final:"Final turn",
+      g_obs:"LZ edge (over obstacles)", g_td:"Touchdown — LZ centre",
+      gs_dw:"DWN", gs_base:"BASE", gs_final:"FIN", gs_obs:"OBS",
+      ap_ok:"✓ LZ long enough: {0} m needed after the obstacle (even at best glide), {1} m available to the centre.",
+      ap_steep:"⚠ Doable, but fly a steep final (plan L/D). At best glide you would float ~{0} m past the centre.",
+      ap_shift:"⚠ Obstacles push the touchdown ~{0} m past the centre (still inside the LZ).",
+      ap_small:"✕ LZ too short for {0} m obstacles: you need at least ~{1} m of clear length.",
+      ap_entry_low:"⚠ Route arrival ({0} m AGL) is below the circuit entry gate ({1} m): plan a shortened circuit or a straight-in final.",
+      ap_wind:"⚠ Wind ≥ airspeed: an into-wind final is not flyable.",
+      ap_terr_ok:"⛰ ✓ Circuit clear of terrain (min +{0} m)",
+      ap_terr_low:"⛰ ⚠ Terrain close under the circuit: only +{0} m clearance",
+      ap_terr_cut:"⛰ ✕ The circuit glide path hits the terrain",
+      ap_help_sum:"How to read the circuit",
+      ap_help:"Final is aligned into the wind (or along the last leg in nil wind), ending at the LZ centre. Gate heights are metres above the LZ, as a plan-L/D → best-L/D bracket: aim inside it and adjust on final. <b>Obstacles</b> = trees/buildings height at the LZ edge — no global obstacle database exists, check on site; your margin (card 3) is added on top. A ~15 m ground run is included.",
       cal_done:"Glide ratio measured in flight.",
       wn_est:"Best-glide estimate — Flare publishes no polar. Calibrate it.",
       wn_m16:"Size 16 tuned from your GPS flights (v≈50 km/h, ~6.5 realistic / ~8 best L/D). Other sizes estimated.",
@@ -324,6 +369,23 @@
       left_t:"reste {0}–{1} m", start:"Départ", end:"Arrivée",
       copied:"Lien copié ✓", copy_prompt:"Copie ce lien :",
       kml_alert:"Pose d'abord un point de départ.", elev_unavail:"élévation indisponible",
+      ap_h:"Approche & atterrissage", ap_on:"Afficher le circuit d'atterrissage au dernier point",
+      lz_r:"Rayon zone", obs_h:"Obstacles", side:"Circuit", side_l:"Main gauche", side_r:"Main droite",
+      ap_final:"finale",
+      g_dw:"Entrée vent arrière", g_base:"Virage base", g_final:"Virage finale",
+      g_obs:"Bord de zone (obstacles)", g_td:"Toucher — centre de zone",
+      gs_dw:"VA", gs_base:"BASE", gs_final:"FIN", gs_obs:"OBS",
+      ap_ok:"✓ Zone assez longue : {0} m nécessaires après l'obstacle (même au best glide), {1} m disponibles jusqu'au centre.",
+      ap_steep:"⚠ Faisable, mais finale raide (finesse planif) obligatoire. Au best glide tu flotterais ~{0} m au-delà du centre.",
+      ap_shift:"⚠ Les obstacles décalent le toucher d'environ {0} m après le centre (reste dans la zone).",
+      ap_small:"✕ Zone trop courte pour des obstacles de {0} m : il faut au moins ~{1} m dégagés.",
+      ap_entry_low:"⚠ Arrivée de la route ({0} m sol) sous la porte d'entrée du circuit ({1} m) : prévois un circuit raccourci ou une finale directe.",
+      ap_wind:"⚠ Vent ≥ vitesse air : finale face au vent impossible.",
+      ap_terr_ok:"⛰ ✓ Circuit dégagé du relief (mini +{0} m)",
+      ap_terr_low:"⛰ ⚠ Relief proche sous le circuit : seulement +{0} m de dégagement",
+      ap_terr_cut:"⛰ ✕ La pente du circuit coupe le relief",
+      ap_help_sum:"Comment lire le circuit",
+      ap_help:"La finale est alignée face au vent (ou dans l'axe du dernier leg par vent nul) et se termine au centre de la zone. Les hauteurs des portes sont en mètres au-dessus de la zone, en fourchette finesse planif → best : vise dedans, ajuste en finale. <b>Obstacles</b> = hauteur des arbres/maisons en bord de zone — aucune base mondiale d'obstacles n'existe, vérifie sur place ; ta marge (carte 3) s'y ajoute. Un roulement d'environ 15 m est inclus.",
       cal_done:"Finesse mesurée en vol.",
       wn_est:"Estimation best-glide — Flare ne publie pas de polaire. À calibrer.",
       wn_m16:"Taille 16 recalée sur tes vols GPS (v≈50 km/h, finesse ~6.5 réaliste / ~8 best). Autres tailles estimées.",
@@ -503,7 +565,7 @@
 
     updateShareUrl();
 
-    if(pts.length<2){blank();scheduleTerrain();return;}
+    if(pts.length<2){blank();renderApproach(null);scheduleTerrain();return;}
     const R=computeRoute(p);
     const aglBest=(p.alt-p.grd)-R.dropB, aglCons=(p.alt-p.grd)-R.dropC;
     const gs=R.totT>0?R.totD/R.totT:0;
@@ -542,6 +604,7 @@
       }).join("");
     } else ll.style.display="none";
 
+    renderApproach(reach?aglCons:null);
     scheduleTerrain();
   }
   function blank(){["vDist","vBear","vTime","vGs","vDrop","vWc"].forEach(i=>$(i).textContent="—");
@@ -707,16 +770,139 @@
     },250);
   }
 
+  /* ---------- approche & atterrissage ----------
+     Circuit en U (vent arrière → base → finale face au vent) terminant au CENTRE de la zone.
+     Hauteurs de porte = perte de plané par leg via solveR0 (vent inclus), en fourchette planif→best.
+     Espace requis = (obstacles + marge) × finesse-sol en finale + roulement. */
+  const AP_ROLL=15; // roulement au sol (m)
+  let apLayers=[], apTerrTimer=null, apTerrSig=null, apTerrPend=null;
+  function clearApLayers(){apLayers.forEach(l=>map.removeLayer(l));apLayers=[];}
+  function gatePill(ll,txt){return L.marker(ll,{interactive:false,icon:L.divIcon({className:"",iconSize:[0,0],html:`<div class="gate">${txt}</div>`})});}
+  function computeApproach(p){
+    const C=pts[pts.length-1];
+    const R=Math.max(5,+$("lzR").value||50);
+    const hObs=Math.max(0,+$("obsH").value||0);
+    const clearNeed=hObs+p.mrg;
+    // axe de finale : face au vent ; par vent quasi nul, dans l'axe du dernier leg
+    let axis;
+    if(p.w<0.26&&pts.length>=2)axis=bearing(pts[pts.length-2],C);
+    else axis=((+$("wdir").value||0)%360+360)%360;
+    const uE=Math.sin(axis*D2R),uN=Math.cos(axis*D2R);
+    const left=$("apSide").value!=="right";
+    const bh=(axis+(left?90:270))%360; // cap de l'étape de base
+    const bE=Math.sin(bh*D2R),bN=Math.cos(bh*D2R);
+    // finesse-sol en finale (face au vent) pour chaque finesse air
+    const rf=solveR0(uE*1000,uN*1000,p);
+    const fsolB=1000*p.g/rf.R0, fsolC=1000*p.gMin/rf.R0;
+    const needB=clearNeed*fsolB+AP_ROLL, needC=clearNeed*fsolC+AP_ROLL;
+    // géométrie du circuit
+    const Lf=R+Math.max(150,Math.ceil(needB/10)*10), Lb=Math.max(100,R+30), Ld=Lf;
+    const F=L.latLng(offset(C,-uE*Lf,-uN*Lf));      // virage de finale
+    const PB=L.latLng(offset(F,-bE*Lb,-bN*Lb));     // virage de base
+    const E=L.latLng(offset(PB,uE*Ld,uN*Ld));       // entrée vent arrière (travers du centre)
+    const X=L.latLng(offset(C,-uE*R,-uN*R));        // bord de zone côté finale
+    // pertes par leg (fourchette best / planif)
+    const leg=(dE,dN)=>{const r=solveR0(dE,dN,p);return[r.R0/p.g,r.R0/p.gMin];};
+    const [fB,fC]=leg(uE*Lf,uN*Lf), [bB2,bC2]=leg(bE*Lb,bN*Lb), [dB,dC]=leg(-uE*Ld,-uN*Ld);
+    return {C,R,axis,E,PB,F,X,clearNeed,hObs,needB,needC,Lf,Lb,
+      HfB:fB,HfC:fC, HbB:fB+bB2,HbC:fC+bC2, HeB:fB+bB2+dB,HeC:fC+bC2+dC,
+      hEdgeB:R/fsolB,hEdgeC:R/fsolC};
+  }
+  function setApMsg(cls,msg){const v=$("apVerdict");v.className=cls;v.innerHTML=msg;v.style.display="";}
+  function renderApproach(routeAgl){
+    clearApLayers();
+    const on=$("apOn").checked,out=$("apOut");
+    if(!on){out.style.display="none";$("apAxis").textContent="—";apTerrSig=null;return;}
+    out.style.display="";
+    if(!pts.length){$("apGates").innerHTML="";setApMsg("warn",T("kml_alert"));
+      $("apTerr").textContent="";$("apEntry").style.display="none";$("apAxis").textContent="—";return;}
+    const p=readParams();
+    if(p.w>=p.vx*0.985){$("apGates").innerHTML="";setApMsg("warn",T("ap_wind"));
+      $("apTerr").textContent="";$("apEntry").style.display="none";$("apAxis").textContent="—";return;}
+    const A=computeApproach(p);
+    $("apAxis").innerHTML=Math.round(A.axis)+"° <small>"+T("ap_final")+"</small>";
+    // carte : zone + circuit + portes
+    const okc=getCSS('--ok');
+    apLayers.push(L.circle(A.C,{radius:A.R,color:okc,weight:1.5,fillColor:okc,fillOpacity:.10,interactive:false}));
+    apLayers.push(L.polyline([A.E,A.PB,A.F,A.C],{color:"#f5f8f6",weight:2,dashArray:"6 6",interactive:false}));
+    const br=(hi,lo)=>Math.round(hi)+"–"+Math.round(lo);
+    apLayers.push(gatePill(A.E,T("gs_dw")+" "+br(A.HeC,A.HeB)));
+    apLayers.push(gatePill(A.PB,T("gs_base")+" "+br(A.HbC,A.HbB)));
+    apLayers.push(gatePill(A.F,T("gs_final")+" "+br(A.HfC,A.HfB)));
+    apLayers.push(gatePill(A.X,T("gs_obs")+" ≥"+Math.round(A.clearNeed)));
+    apLayers.forEach(l=>l.addTo(map));
+    // panneau : portes
+    const rows=[
+      [T("g_dw"),br(A.HeC,A.HeB)+" "+T("msol")],
+      [T("g_base"),br(A.HbC,A.HbB)+" "+T("msol")],
+      [T("g_final"),br(A.HfC,A.HfB)+" "+T("msol")],
+      [T("g_obs"),br(A.hEdgeC,A.hEdgeB)+" "+T("msol")+" · ≥ "+Math.round(A.clearNeed)+" m"],
+      [T("g_td"),"0 "+T("msol")]
+    ];
+    $("apGates").innerHTML=rows.map(r=>`<div><b>${r[0]}</b><span class="val">${r[1]}</span></div>`).join("");
+    // verdict d'espace
+    if(A.R>=A.needB)setApMsg("okmsg",T("ap_ok",Math.round(A.needB),Math.round(A.R)));
+    else if(A.R>=A.needC)setApMsg("warn",T("ap_steep",Math.round(A.needB-A.R)));
+    else if(2*A.R>=A.needC)setApMsg("warn",T("ap_shift",Math.round(A.needC-A.R)));
+    else setApMsg("warn",T("ap_small",Math.round(A.hObs),Math.ceil(A.needC/10)*10));
+    // cohérence avec l'arrivée de la route
+    const en=$("apEntry");
+    if(routeAgl!=null&&routeAgl<A.HeC){en.style.display="";en.innerHTML=T("ap_entry_low",Math.round(routeAgl),Math.round(A.HeC));}
+    else en.style.display="none";
+    scheduleApTerrain(A,p);
+  }
+  function scheduleApTerrain(A,p){
+    const sig=[A.C.lat.toFixed(4),A.C.lng.toFixed(4),Math.round(A.axis),A.Lf,A.Lb,Math.round(p.grd),Math.round(A.HeB),Math.round(A.clearNeed),lang].join("|");
+    if(apTerrSig===sig)return;
+    clearTimeout(apTerrTimer);
+    $("apTerr").textContent="…";$("apTerr").style.color="";
+    apTerrTimer=setTimeout(()=>fetchApTerrain(A,p,sig),700);
+  }
+  function fetchApTerrain(A,p,sig){
+    if(apTerrPend===sig)return;apTerrPend=sig;
+    // échantillons le long du circuit ; ligne pilote = hauteurs best glide (la plus basse = pire cas)
+    const path=[A.E,A.PB,A.F,A.C],hB=[A.HeB,A.HbB,A.HfB,0];
+    const Dl=[];let tot=0;
+    for(let i=0;i<3;i++){const d=map.distance(path[i],path[i+1]);Dl.push(d);tot+=d;}
+    const N=24,lats=[],lngs=[],hs=[],ds=[];
+    for(let j=0;j<N;j++){
+      const d=j/(N-1)*tot;let acc=0,i=0;
+      while(i<2&&acc+Dl[i]<d){acc+=Dl[i];i++;}
+      const f=Dl[i]>0?(d-acc)/Dl[i]:0;
+      lats.push((path[i].lat+(path[i+1].lat-path[i].lat)*f).toFixed(5));
+      lngs.push((path[i].lng+(path[i+1].lng-path[i].lng)*f).toFixed(5));
+      hs.push(hB[i]+(hB[i+1]-hB[i])*f);ds.push(d);
+    }
+    fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lats.join(",")}&longitude=${lngs.join(",")}`)
+      .then(r=>r.json()).then(j=>{
+        apTerrPend=null;
+        if(!j||!j.elevation||j.elevation.length!==N)throw 0;
+        apTerrSig=sig;
+        let mn=Infinity;
+        for(let k=0;k<N;k++){
+          if(tot-ds[k]<=A.R)continue; // à l'intérieur de la zone : on touche, normal
+          const cl=p.grd+hs[k]-j.elevation[k];
+          if(cl<mn)mn=cl;
+        }
+        const el=$("apTerr");
+        if(mn<0){el.textContent=T("ap_terr_cut");el.style.color=getCSS('--danger-ink');}
+        else if(mn<A.clearNeed){el.textContent=T("ap_terr_low",Math.round(mn));el.style.color=getCSS('--signal-ink');}
+        else{el.textContent=T("ap_terr_ok",mn===Infinity?"—":Math.round(mn));el.style.color=getCSS('--ok-ink');}
+      }).catch(()=>{apTerrPend=null;$("apTerr").textContent=T("elev_unavail");});
+  }
+
   /* ---------- partage & persistance ---------- */
   function stateObj(){
     return{w:$("wing").value,s:$("size").value,f:$("glide").value,fm:$("glideMin").value,vs:$("vspeed").value,
       wd:$("wdir").value,ws:$("wind").value,a:$("alt").value,g:$("ground").value,m:$("margin").value,
-      ae:$("autoElev").checked?1:0,l:lang,p:pts.map(q=>[+q.lat.toFixed(5),+q.lng.toFixed(5)])};
+      ae:$("autoElev").checked?1:0,ap:$("apOn").checked?1:0,lr:$("lzR").value,oh:$("obsH").value,as:$("apSide").value,
+      l:lang,p:pts.map(q=>[+q.lat.toFixed(5),+q.lng.toFixed(5)])};
   }
   function updateShareUrl(){
     const o=stateObj(),q=new URLSearchParams();
     q.set("w",o.w);q.set("s",o.s);q.set("f",o.f);q.set("fm",o.fm);q.set("vs",o.vs);
     q.set("wd",o.wd);q.set("ws",o.ws);q.set("a",o.a);q.set("g",o.g);q.set("m",o.m);q.set("ae",o.ae);q.set("l",o.l);
+    q.set("ap",o.ap);q.set("lr",o.lr);q.set("oh",o.oh);q.set("as",o.as);
     if(o.p.length)q.set("p",o.p.map(x=>x[0]+"~"+x[1]).join("_"));
     const c=map.getCenter();
     q.set("c",c.lat.toFixed(5)+"~"+c.lng.toFixed(5));q.set("z",map.getZoom());
@@ -735,7 +921,8 @@
     const h=new URLSearchParams(INIT_HASH.slice(1));
     if(h.has("p")||h.has("f")){
       const o={w:h.get("w"),s:h.get("s"),f:h.get("f"),fm:h.get("fm"),vs:h.get("vs"),wd:h.get("wd"),ws:h.get("ws"),
-        a:h.get("a"),g:h.get("g"),m:h.get("m"),ae:h.get("ae"),l:h.get("l"),p:[]};
+        a:h.get("a"),g:h.get("g"),m:h.get("m"),ae:h.get("ae"),ap:h.get("ap"),lr:h.get("lr"),oh:h.get("oh"),as:h.get("as"),
+        l:h.get("l"),p:[]};
       if(h.get("p"))o.p=h.get("p").split("_").map(s=>s.split("~").map(Number)).filter(x=>x.length===2&&isFinite(x[0])&&isFinite(x[1]));
       if(h.get("c")){const cc=h.get("c").split("~").map(Number);if(cc.length===2&&isFinite(cc[0])&&isFinite(cc[1]))o.c=cc;}
       if(h.get("z")&&isFinite(+h.get("z")))o.z=+h.get("z");
@@ -756,6 +943,10 @@
     if(st.g!=null)$("ground").value=st.g;
     if(st.m!=null)$("margin").value=st.m;
     if(st.ae!=null)$("autoElev").checked=!!+st.ae;
+    if(st.ap!=null)$("apOn").checked=!!+st.ap;
+    if(st.lr!=null)$("lzR").value=st.lr;
+    if(st.oh!=null)$("obsH").value=st.oh;
+    if(st.as==="left"||st.as==="right")$("apSide").value=st.as;
     (st.p||[]).forEach(x=>addPoint(L.latLng(x[0],x[1]),true));
     if(st.c&&st.z!=null)map.setView(st.c,st.z);
     else if(pts.length>=2)map.fitBounds(L.latLngBounds(pts),{padding:[60,60]});
@@ -818,8 +1009,9 @@ ${route}
 
   $("wing").addEventListener("change",()=>{fillSizes();saveState();});
   $("size").addEventListener("change",()=>{applyWing();saveState();});
-  ["glide","glideMin","vspeed","wind","wdir","alt","ground","margin"].forEach(i=>$(i).addEventListener("input",()=>{recompute();saveState();}));
+  ["glide","glideMin","vspeed","wind","wdir","alt","ground","margin","lzR","obsH"].forEach(i=>$(i).addEventListener("input",()=>{recompute();saveState();}));
   $("autoElev").addEventListener("change",()=>{fetchGround();saveState();});
+  ["apOn","apSide"].forEach(i=>$(i).addEventListener("change",()=>{recompute();saveState();}));
 
   /* ---------- init ---------- */
   fillWings();
